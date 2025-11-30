@@ -1,0 +1,1104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Moderators Daily Report</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card-bg: #ffffff;
+      --primary: #1f6feb;
+      --primary-dark: #164db3;
+      --border: #d6d9e0;
+      --text-main: #111827;
+      --text-muted: #6b7280;
+      --danger: #dc2626;
+      --success: #16a34a;
+      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #e0ebff, #f5f7fb 40%);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 980px;
+      margin: 16px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      padding: 20px 18px;
+    }
+
+    @media (min-width: 768px) {
+      .card {
+        padding: 26px 24px;
+      }
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .title-block span {
+      display: block;
+      margin-top: 4px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .step-indicator {
+      display: flex;
+      gap: 6px;
+      font-size: 0.8rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .step-pill {
+      padding: 4px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .step-pill span.num {
+      display: inline-flex;
+      width: 18px;
+      height: 18px;
+      border-radius: 999px;
+      justify-content: center;
+      align-items: center;
+      font-size: 0.7rem;
+      background: #e5edff;
+    }
+
+    .step-pill.active {
+      background: rgba(31, 111, 235, 0.08);
+      border-color: var(--primary);
+      color: var(--primary-dark);
+      font-weight: 600;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 14px;
+    }
+
+    @media (min-width: 640px) {
+      .form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      display: block;
+      color: var(--text-main);
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    input[type="text"],
+    input[type="tel"],
+    input[type="number"],
+    input[type="date"],
+    select {
+      width: 100%;
+      padding: 9px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      font-size: 0.9rem;
+      outline: none;
+      background: #f9fafb;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(31, 111, 235, 0.15);
+      background: #ffffff;
+    }
+
+    .small-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 9px 16px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: #ffffff;
+      box-shadow: 0 8px 18px rgba(31, 111, 235, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(31, 111, 235, 0.32);
+    }
+
+    .btn-secondary {
+      background: #eef2ff;
+      color: var(--primary-dark);
+    }
+
+    .btn-secondary:hover {
+      background: #e0e7ff;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border-radius: 10px;
+      padding-inline: 10px;
+      padding-block: 7px;
+      font-weight: 500;
+      color: var(--danger);
+      border: 1px solid rgba(220, 38, 38, 0.2);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(220, 38, 38, 0.05);
+    }
+
+    .btn-block {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .footer-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .footer-actions-left {
+      margin-right: auto;
+    }
+
+    .check-status {
+      font-size: 0.8rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 4px;
+      border-radius: 999px;
+      padding: 4px 10px;
+      background: #f3f4f6;
+      color: var(--text-muted);
+    }
+
+    .check-status span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--text-muted);
+    }
+
+    .check-status.early {
+      background: #ecfdf3;
+      color: var(--success);
+    }
+
+    .check-status.early span.dot {
+      background: var(--success);
+    }
+
+    .check-status.late {
+      background: #fef2f2;
+      color: var(--danger);
+    }
+
+    .check-status.late span.dot {
+      background: var(--danger);
+    }
+
+    .check-status.ontime {
+      background: #eff6ff;
+      color: var(--primary-dark);
+    }
+
+    .check-status.ontime span.dot {
+      background: var(--primary-dark);
+    }
+
+    .check-display {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Bookings table */
+    .table-wrapper {
+      border-radius: 14px;
+      border: 1px solid var(--border);
+      background: #f9fafb;
+      padding: 10px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 760px;
+    }
+
+    th,
+    td {
+      padding: 6px 8px;
+      text-align: left;
+      border-bottom: 1px solid #e5e7eb;
+    }
+
+    thead {
+      background: #eef2ff;
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    td input,
+    td select {
+      font-size: 0.78rem;
+      padding: 4px 6px;
+      border-radius: 8px;
+    }
+
+    td input[type="checkbox"] {
+      width: auto;
+      transform: scale(1.1);
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 10px;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef2ff;
+      font-size: 0.78rem;
+      color: var(--primary-dark);
+    }
+
+    .badge strong {
+      font-weight: 700;
+    }
+
+    .divider {
+      border-top: 1px dashed #e5e7eb;
+      margin: 12px 0;
+    }
+
+    @media (max-width: 600px) {
+      .header {
+        align-items: flex-start;
+      }
+
+      .title-block h1 {
+        font-size: 1.35rem;
+      }
+
+      .card {
+        padding: 18px 14px;
+      }
+
+      table {
+        min-width: 640px;
+      }
+
+      .footer-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+
+      .footer-actions-left {
+        margin-right: 0;
+      }
+
+      .btn-block-mobile {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <div class="card">
+    <div class="header">
+      <div class="title-block">
+        <h1>Moderators Daily Report</h1>
+        <span>Track attendance, performance & bookings in one place.</span>
+      </div>
+      <div class="step-indicator">
+        <div class="step-pill active" data-step-pill="1">
+          <span class="num">1</span> Header
+        </div>
+        <div class="step-pill" data-step-pill="2">
+          <span class="num">2</span> Bookings
+        </div>
+        <div class="step-pill" data-step-pill="3">
+          <span class="num">3</span> Check Out & PDF
+        </div>
+      </div>
+    </div>
+
+    <!-- SECTION 1 -->
+    <section class="section active" id="section-1">
+      <div class="form-grid">
+        <div class="field">
+          <label for="reportDate">Date<span style="color:#dc2626">*</span></label>
+          <input type="date" id="reportDate" required />
+          <div class="small-hint">Select report date (defaults to today).</div>
+        </div>
+
+        <div class="field">
+          <label for="moderatorName">Moderator Name<span style="color:#dc2626">*</span></label>
+          <select id="moderatorName" required>
+            <option value="">Select moderator</option>
+            <option>Shahd</option>
+            <option>Manar</option>
+            <option>Treeza</option>
+            <option>Engy</option>
+            <option>Monica</option>
+            <option>Zeinab</option>
+            <option>Samah</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="shift">Shift<span style="color:#dc2626">*</span></label>
+          <select id="shift" required>
+            <option value="">Select shift</option>
+            <option value="9-17">9 am : 5 pm</option>
+            <option value="17-1">5 pm : 1 am</option>
+            <option value="1-9">1 am : 9 am</option>
+            <option value="cover">Cover</option>
+          </select>
+          <div class="small-hint">Used to calculate early/late check in & out.</div>
+        </div>
+
+        <div class="field">
+          <label>Check In</label>
+          <button type="button" id="checkInBtn" class="btn btn-primary btn-block-mobile">
+            ⏱ Check In (now)
+          </button>
+          <div id="checkInDisplay" class="check-display">Not checked in yet.</div>
+          <div id="checkInStatus" class="check-status" style="display:none;">
+            <span class="dot"></span><span class="text"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cover details -->
+      <div id="coverDetails" style="margin-top:16px; display:none;">
+        <div class="divider"></div>
+        <div style="font-size:0.9rem; font-weight:600; margin-bottom:8px;">
+          Cover details
+        </div>
+        <div class="form-grid">
+          <div class="field">
+            <label for="coverFor">Covering for</label>
+            <select id="coverFor">
+              <option value="">Select moderator</option>
+              <option>Shahd</option>
+              <option>Manar</option>
+              <option>Treeza</option>
+              <option>Engy</option>
+              <option>Monica</option>
+              <option>Zeinab</option>
+              <option>Samah</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="coverShift">Covered shift</label>
+            <select id="coverShift">
+              <option value="">Select covered shift</option>
+              <option value="9-17">9 am : 5 pm</option>
+              <option value="17-1">5 pm : 1 am</option>
+              <option value="1-9">1 am : 9 am</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-actions">
+        <div class="footer-actions-left small-hint">
+          All fields on this step are required before moving to Bookings.
+        </div>
+        <button type="button" id="nextTo2" class="btn btn-primary btn-block-mobile">
+          Next: Bookings →
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 2 -->
+    <section class="section" id="section-2">
+      <div style="margin-bottom:10px;">
+        <strong>Bookings Details</strong>
+        <div class="small-hint">
+          Add all clients handled during this shift.
+        </div>
+      </div>
+
+      <div class="table-wrapper">
+        <table id="bookingsTable">
+          <thead>
+          <tr>
+            <th>#</th>
+            <th>Name</th>
+            <th>Phone</th>
+            <th>Session No.</th>
+            <th>Session Date</th>
+            <th>Service</th>
+            <th>Platform</th>
+            <th>Branch</th>
+            <th>Marked</th>
+            <th>Actions</th>
+          </tr>
+          </thead>
+          <tbody id="bookingsBody">
+          <!-- Rows added dynamically -->
+          </tbody>
+        </table>
+      </div>
+
+      <div class="table-footer">
+        <div>
+          <button type="button" id="addClientBtn" class="btn btn-secondary btn-block-mobile">
+            + Add client
+          </button>
+        </div>
+        <div>
+          <span class="badge">
+            Total clients: <strong id="totalClients">0</strong>
+          </span>
+        </div>
+      </div>
+
+      <div class="footer-actions" style="margin-top:18px;">
+        <button type="button" id="backTo1" class="btn btn-secondary btn-block-mobile">
+          ← Back
+        </button>
+        <button type="button" id="nextTo3" class="btn btn-primary btn-block-mobile">
+          Next: Check Out →
+        </button>
+      </div>
+    </section>
+
+    <!-- SECTION 3 -->
+    <section class="section" id="section-3">
+      <div class="form-grid">
+        <div class="field">
+          <label>Check Out</label>
+          <button type="button" id="checkOutBtn" class="btn btn-primary btn-block-mobile">
+            ⏱ Check Out (now)
+          </button>
+          <div id="checkOutDisplay" class="check-display">Not checked out yet.</div>
+          <div id="checkOutStatus" class="check-status" style="display:none;">
+            <span class="dot"></span><span class="text"></span>
+          </div>
+        </div>
+
+        <div class="field">
+          <label>Summary</label>
+          <div class="small-hint">
+            When you’re ready, click <strong>Send Data</strong> to generate the PDF report
+            with all shift & bookings details.
+          </div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="footer-actions">
+        <button type="button" id="backTo2" class="btn btn-secondary btn-block-mobile">
+          ← Back
+        </button>
+        <button type="button" id="sendDataBtn" class="btn btn-primary btn-block btn-block-mobile">
+          📄 Send Data (Generate PDF)
+        </button>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+  // --- State ---
+  let checkInTime = null;
+  let checkOutTime = null;
+
+  // DOM shortcuts
+  const section1 = document.getElementById("section-1");
+  const section2 = document.getElementById("section-2");
+  const section3 = document.getElementById("section-3");
+  const stepPills = document.querySelectorAll("[data-step-pill]");
+
+  const reportDateInput = document.getElementById("reportDate");
+  const moderatorSelect = document.getElementById("moderatorName");
+  const shiftSelect = document.getElementById("shift");
+  const coverDetails = document.getElementById("coverDetails");
+  const coverForInput = document.getElementById("coverFor");
+  const coverShiftInput = document.getElementById("coverShift");
+
+  const checkInBtn = document.getElementById("checkInBtn");
+  const checkInDisplay = document.getElementById("checkInDisplay");
+  const checkInStatus = document.getElementById("checkInStatus");
+
+  const checkOutBtn = document.getElementById("checkOutBtn");
+  const checkOutDisplay = document.getElementById("checkOutDisplay");
+  const checkOutStatus = document.getElementById("checkOutStatus");
+
+  const nextTo2Btn = document.getElementById("nextTo2");
+  const backTo1Btn = document.getElementById("backTo1");
+  const nextTo3Btn = document.getElementById("nextTo3");
+  const backTo2Btn = document.getElementById("backTo2");
+  const sendDataBtn = document.getElementById("sendDataBtn");
+
+  const addClientBtn = document.getElementById("addClientBtn");
+  const bookingsBody = document.getElementById("bookingsBody");
+  const totalClientsSpan = document.getElementById("totalClients");
+
+  // --- Helpers ---
+
+  function setActiveSection(step) {
+    [section1, section2, section3].forEach((sec, idx) => {
+      sec.classList.toggle("active", idx + 1 === step);
+    });
+    stepPills.forEach((pill) => {
+      pill.classList.toggle("active", Number(pill.dataset.stepPill) === step);
+    });
+  }
+
+  function pad2(num) {
+    return num.toString().padStart(2, "0");
+  }
+
+  function formatDateTime(dt) {
+    if (!dt) return "";
+    const y = dt.getFullYear();
+    const m = pad2(dt.getMonth() + 1);
+    const d = pad2(dt.getDate());
+    let h = dt.getHours();
+    const min = pad2(dt.getMinutes());
+    const ampm = h >= 12 ? "PM" : "AM";
+    h = h % 12;
+    if (h === 0) h = 12;
+    return `${y}-${m}-${d} ${pad2(h)}:${min} ${ampm}`;
+  }
+
+  function getShiftTimes(dateStr, shiftValue) {
+    // return { start: Date|null, end: Date|null }
+    if (!dateStr || !shiftValue || shiftValue === "cover") {
+      return { start: null, end: null };
+    }
+    const [year, month, day] = dateStr.split("-").map(Number);
+    let start, end;
+
+    if (shiftValue === "9-17") {
+      start = new Date(year, month - 1, day, 9, 0, 0);
+      end = new Date(year, month - 1, day, 17, 0, 0);
+    } else if (shiftValue === "17-1") {
+      start = new Date(year, month - 1, day, 17, 0, 0);
+      end = new Date(year, month - 1, day, 1, 0, 0);
+      end.setDate(end.getDate() + 1); // 1 am next day
+    } else if (shiftValue === "1-9") {
+      start = new Date(year, month - 1, day, 1, 0, 0);
+      end = new Date(year, month - 1, day, 9, 0, 0);
+    }
+
+    return { start, end };
+  }
+
+  // typeLabel: 'in' or 'out'; invertColors = true for checkout (early red, late green)
+  function setStatusElement(el, diffMinutes, typeLabel, invertColors = false) {
+    if (!el) return;
+
+    el.style.display = "inline-flex";
+    el.classList.remove("early", "late", "ontime");
+    const textSpan = el.querySelector(".text");
+
+    if (diffMinutes == null) {
+      el.style.display = "none";
+      return;
+    }
+
+    if (diffMinutes > 2) {
+      // late
+      const cls = invertColors ? "early" : "late"; // invert for checkout
+      el.classList.add(cls);
+      textSpan.textContent = `Late by ${Math.round(diffMinutes)} min`;
+    } else if (diffMinutes < -2) {
+      // early
+      const cls = invertColors ? "late" : "early";
+      el.classList.add(cls);
+      textSpan.textContent = `Early by ${Math.abs(Math.round(diffMinutes))} min`;
+    } else {
+      el.classList.add("ontime");
+      textSpan.textContent = "On time";
+    }
+  }
+
+  function updateTotalClients() {
+    const rows = bookingsBody.querySelectorAll("tr");
+    totalClientsSpan.textContent = rows.length.toString();
+  }
+
+  function createBookingRow() {
+    const row = document.createElement("tr");
+
+    const indexCell = document.createElement("td");
+    indexCell.textContent = (bookingsBody.children.length + 1).toString();
+    row.appendChild(indexCell);
+
+    // Name
+    const nameCell = document.createElement("td");
+    const nameInput = document.createElement("input");
+    nameInput.type = "text";
+    nameInput.placeholder = "Client name";
+    nameCell.appendChild(nameInput);
+    row.appendChild(nameCell);
+
+    // Phone
+    const phoneCell = document.createElement("td");
+    const phoneInput = document.createElement("input");
+    phoneInput.type = "tel";
+    phoneInput.placeholder = "Phone";
+    phoneCell.appendChild(phoneInput);
+    row.appendChild(phoneCell);
+
+    // Session Number
+    const sessionNoCell = document.createElement("td");
+    const sessionNoInput = document.createElement("input");
+    sessionNoInput.type = "number";
+    sessionNoInput.min = "1";
+    sessionNoInput.placeholder = "No.";
+    sessionNoCell.appendChild(sessionNoInput);
+    row.appendChild(sessionNoCell);
+
+    // Session Date
+    const sessionDateCell = document.createElement("td");
+    const sessionDateInput = document.createElement("input");
+    sessionDateInput.type = "date";
+    sessionDateCell.appendChild(sessionDateInput);
+    row.appendChild(sessionDateCell);
+
+    // Service
+    const serviceCell = document.createElement("td");
+    const serviceInput = document.createElement("input");
+    serviceInput.type = "text";
+    serviceInput.placeholder = "Service";
+    serviceCell.appendChild(serviceInput);
+    row.appendChild(serviceCell);
+
+    // Platform
+    const platformCell = document.createElement("td");
+    const platformSelect = document.createElement("select");
+    ["", "facebook", "Instagram", "whatsapp", "phone call"].forEach((val) => {
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val === "" ? "Select" : val;
+      platformSelect.appendChild(opt);
+    });
+    platformCell.appendChild(platformSelect);
+    row.appendChild(platformCell);
+
+    // Branch
+    const branchCell = document.createElement("td");
+    const branchSelect = document.createElement("select");
+    ["", "You Clinic", "Scar Clinic"].forEach((val) => {
+      const opt = document.createElement("option");
+      opt.value = val;
+      opt.textContent = val === "" ? "Select" : val;
+      branchSelect.appendChild(opt);
+    });
+    branchCell.appendChild(branchSelect);
+    row.appendChild(branchCell);
+
+    // Marked
+    const markedCell = document.createElement("td");
+    const markedCheckbox = document.createElement("input");
+    markedCheckbox.type = "checkbox";
+    markedCell.appendChild(markedCheckbox);
+    row.appendChild(markedCell);
+
+    // Actions
+    const actionsCell = document.createElement("td");
+    const deleteBtn = document.createElement("button");
+    deleteBtn.type = "button";
+    deleteBtn.className = "btn btn-ghost";
+    deleteBtn.textContent = "Delete";
+    deleteBtn.addEventListener("click", () => {
+      row.remove();
+      // re-index rows
+      Array.from(bookingsBody.children).forEach((tr, idx) => {
+        tr.firstChild.textContent = (idx + 1).toString();
+      });
+      updateTotalClients();
+    });
+    actionsCell.appendChild(deleteBtn);
+    row.appendChild(actionsCell);
+
+    bookingsBody.appendChild(row);
+    updateTotalClients();
+  }
+
+  function collectBookingsData() {
+    const rows = bookingsBody.querySelectorAll("tr");
+    const data = [];
+    rows.forEach((tr, idx) => {
+      const tds = tr.querySelectorAll("td");
+      const getInput = (cellIdx) => tds[cellIdx].querySelector("input, select");
+
+      data.push({
+        index: idx + 1,
+        name: getInput(1).value.trim(),
+        phone: getInput(2).value.trim(),
+        sessionNumber: getInput(3).value.trim(),
+        sessionDate: getInput(4).value || "",
+        service: getInput(5).value.trim(),
+        platform: getInput(6).value,
+        branch: getInput(7).value,
+        marked: tds[8].querySelector("input[type='checkbox']").checked ? "Yes" : "No",
+      });
+    });
+    return data;
+  }
+
+  function computeBranchTotals(bookings) {
+    let total = bookings.length;
+    let scar = 0;
+    let you = 0;
+
+    bookings.forEach((b) => {
+      if (b.branch === "Scar Clinic") scar++;
+      if (b.branch === "You Clinic") you++;
+    });
+
+    return { total, scar, you };
+  }
+
+  // --- Event wiring ---
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // Default date -> today
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = pad2(today.getMonth() + 1);
+    const dd = pad2(today.getDate());
+    reportDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    // Shift change -> show/hide cover details
+    shiftSelect.addEventListener("change", () => {
+      if (shiftSelect.value === "cover") {
+        coverDetails.style.display = "block";
+      } else {
+        coverDetails.style.display = "none";
+        coverForInput.value = "";
+        coverShiftInput.value = "";
+      }
+    });
+
+    // Check In
+    checkInBtn.addEventListener("click", () => {
+      const dateStr = reportDateInput.value;
+      const shiftValue = shiftSelect.value;
+
+      const now = new Date();
+      checkInTime = now;
+      checkInDisplay.textContent = `Checked in at: ${formatDateTime(now)}`;
+
+      const { start } = getShiftTimes(dateStr, shiftValue);
+      if (!start || shiftValue === "cover") {
+        checkInStatus.style.display = "inline-flex";
+        checkInStatus.classList.remove("early", "late", "ontime");
+        checkInStatus.classList.add("ontime");
+        checkInStatus.querySelector(".text").textContent = "No reference shift (cover).";
+      } else {
+        const diffMinutes = (now - start) / (1000 * 60);
+        setStatusElement(checkInStatus, diffMinutes, "in", false);
+      }
+    });
+
+    // Check Out
+    checkOutBtn.addEventListener("click", () => {
+      const dateStr = reportDateInput.value;
+      const shiftValue = shiftSelect.value;
+
+      const now = new Date();
+      checkOutTime = now;
+      checkOutDisplay.textContent = `Checked out at: ${formatDateTime(now)}`;
+
+      const { end } = getShiftTimes(dateStr, shiftValue);
+      if (!end || shiftValue === "cover") {
+        checkOutStatus.style.display = "inline-flex";
+        checkOutStatus.classList.remove("early", "late", "ontime");
+        checkOutStatus.classList.add("ontime");
+        checkOutStatus.querySelector(".text").textContent = "No reference shift (cover).";
+      } else {
+        const diffMinutes = (now - end) / (1000 * 60);
+        // invertColors = true so: early = red, late = green
+        setStatusElement(checkOutStatus, diffMinutes, "out", true);
+      }
+    });
+
+    // Navigation
+    nextTo2Btn.addEventListener("click", () => {
+      if (!reportDateInput.value) {
+        alert("Please select the report date.");
+        return;
+      }
+      if (!moderatorSelect.value) {
+        alert("Please select the moderator name.");
+        return;
+      }
+      if (!shiftSelect.value) {
+        alert("Please select the shift.");
+        return;
+      }
+      if (shiftSelect.value === "cover") {
+        if (!coverForInput.value) {
+          alert("Please select who you are covering for.");
+          return;
+        }
+        if (!coverShiftInput.value) {
+          alert("Please select the covered shift.");
+          return;
+        }
+      }
+      if (!checkInTime) {
+        alert("Please click Check In before continuing.");
+        return;
+      }
+      setActiveSection(2);
+    });
+
+    backTo1Btn.addEventListener("click", () => setActiveSection(1));
+
+    nextTo3Btn.addEventListener("click", () => {
+      setActiveSection(3);
+    });
+
+    backTo2Btn.addEventListener("click", () => setActiveSection(2));
+
+    // Add client
+    addClientBtn.addEventListener("click", () => {
+      createBookingRow();
+    });
+
+    // Send data -> PDF only
+    sendDataBtn.addEventListener("click", () => {
+      if (!checkOutTime) {
+        alert("Please click Check Out before sending data.");
+        return;
+      }
+
+      const dateStr = reportDateInput.value;
+      const moderator = moderatorSelect.value;
+      const shiftValue = shiftSelect.value;
+
+      const bookings = collectBookingsData();
+      const totals = computeBranchTotals(bookings);
+
+      const { start, end } = getShiftTimes(dateStr, shiftValue);
+
+      let checkInDiff = null;
+      let checkOutDiff = null;
+
+      if (start && shiftValue !== "cover" && checkInTime) {
+        checkInDiff = (checkInTime - start) / (1000 * 60);
+      }
+      if (end && shiftValue !== "cover" && checkOutTime) {
+        checkOutDiff = (checkOutTime - end) / (1000 * 60);
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+
+      let y = 14;
+      doc.setFontSize(16);
+      doc.setFont("helvetica", "bold");
+      doc.text("Moderators Daily Report", 14, y);
+      y += 8;
+
+      doc.setFontSize(11);
+      doc.setFont("helvetica", "normal");
+      doc.text(`Moderator: ${moderator || "-"}`, 14, y);
+      y += 6;
+      doc.text(`Date: ${dateStr || "-"}`, 14, y);
+      y += 6;
+
+      let shiftLabel = "";
+      if (shiftValue === "9-17") shiftLabel = "9 am : 5 pm";
+      else if (shiftValue === "17-1") shiftLabel = "5 pm : 1 am";
+      else if (shiftValue === "1-9") shiftLabel = "1 am : 9 am";
+      else if (shiftValue === "cover") shiftLabel = "Cover";
+
+      doc.text(`Shift: ${shiftLabel || "-"}`, 14, y);
+      y += 6;
+
+      if (shiftValue === "cover") {
+        doc.text(`Covering for: ${coverForInput.value || "-"}`, 14, y);
+        y += 6;
+        const cs = coverShiftInput.value;
+        let csLabel = "";
+        if (cs === "9-17") csLabel = "9 am : 5 pm";
+        else if (cs === "17-1") csLabel = "5 pm : 1 am";
+        else if (cs === "1-9") csLabel = "1 am : 9 am";
+        doc.text(`Covered shift: ${csLabel || "-"}`, 14, y);
+        y += 6;
+      }
+
+      doc.text(`Check In: ${checkInTime ? formatDateTime(checkInTime) : "-"}`, 14, y);
+      y += 6;
+      if (checkInDiff != null) {
+        const inText =
+          checkInDiff > 2
+            ? `Late by ${Math.round(checkInDiff)} min`
+            : checkInDiff < -2
+            ? `Early by ${Math.abs(Math.round(checkInDiff))} min`
+            : "On time";
+        doc.text(`Check In status: ${inText}`, 14, y);
+        y += 6;
+      }
+
+      doc.text(`Check Out: ${checkOutTime ? formatDateTime(checkOutTime) : "-"}`, 14, y);
+      y += 6;
+      if (checkOutDiff != null) {
+        const outText =
+          checkOutDiff > 2
+            ? `Late by ${Math.round(checkOutDiff)} min`
+            : checkOutDiff < -2
+            ? `Early by ${Math.abs(Math.round(checkOutDiff))} min`
+            : "On time";
+        doc.text(`Check Out status: ${outText}`, 14, y);
+        y += 8;
+      } else {
+        y += 4;
+      }
+
+      // Clients summary
+      doc.setFont("helvetica", "bold");
+      doc.text("Clients Summary", 14, y);
+      y += 6;
+      doc.setFont("helvetica", "normal");
+      doc.text(`Total clients: ${totals.total}`, 14, y);
+      y += 5;
+      doc.text(`Scar Clinic clients: ${totals.scar}`, 14, y);
+      y += 5;
+      doc.text(`You Clinic clients: ${totals.you}`, 14, y);
+      y += 6;
+
+      // Bookings table in PDF
+      const tableBody = bookings.map((b) => [
+        b.index.toString(),
+        b.name,
+        b.phone,
+        b.sessionNumber,
+        b.sessionDate,
+        b.service,
+        b.platform,
+        b.branch,
+        b.marked,
+      ]);
+
+      doc.autoTable({
+        startY: y,
+        head: [
+          ["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"],
+        ],
+        body: tableBody,
+        styles: { fontSize: 8 },
+        headStyles: { fillColor: [31, 111, 235] },
+      });
+
+      const fileNamePDF = `${moderator || "Moderator"}-${dateStr || "report"}.pdf`;
+      doc.save(fileNamePDF);
+    });
+  });
+</script>
+</body>
+</html>
