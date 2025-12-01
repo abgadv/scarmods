@@ -325,7 +325,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 780px;
+      min-width: 820px;
       color: var(--text-main);
     }
 
@@ -425,7 +425,7 @@
       }
 
       table {
-        min-width: 640px;
+        min-width: 680px;
       }
 
       .footer-actions {
@@ -440,6 +440,15 @@
       .btn-block-mobile {
         width: 100%;
       }
+    }
+
+    .app-footer {
+      margin-top: 16px;
+      padding-top: 8px;
+      border-top: 1px dashed #1f2937;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      text-align: center;
     }
   </style>
 </head>
@@ -574,6 +583,7 @@
             <th>Service</th>
             <th>Platform</th>
             <th>Branch</th>
+            <th>New?</th>
             <th>Marked</th>
             <th>Actions</th>
           </tr>
@@ -646,6 +656,11 @@
         </button>
       </div>
     </section>
+
+    <!-- APP FOOTER (UI) -->
+    <div class="app-footer">
+      Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan ©
+    </div>
   </div>
 </div>
 
@@ -675,7 +690,7 @@
   // --- State ---
   let checkInTime = null;
   let checkOutTime = null;
-  let activeStep = 1; // عشان نرجع لنفس الـ step بعد الريفريش
+  let activeStep = 1;
 
   // DOM shortcuts
   const section1 = document.getElementById("section-1");
@@ -729,7 +744,7 @@
         checkInTime: checkInTime ? checkInTime.toISOString() : null,
         checkOutTime: checkOutTime ? checkOutTime.toISOString() : null,
         bookings: collectBookingsData(),
-        activeStep // هنا بنحفظ انت واقف فى أنهي step
+        activeStep
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
     } catch (e) {
@@ -782,7 +797,18 @@
           tds[5].querySelector("input").value = b.service || "";
           tds[6].querySelector("select").value = b.platform || "";
           tds[7].querySelector("select").value = b.branch || "";
-          tds[8].querySelector("input[type='checkbox']").checked = b.marked === "Yes";
+
+          // New?
+          const newCheckbox = tds[8].querySelector("input[type='checkbox']");
+          if (newCheckbox) {
+            newCheckbox.checked = b.isNew === "Yes";
+          }
+
+          // Marked
+          const markedCheckbox = tds[9].querySelector("input[type='checkbox']");
+          if (markedCheckbox) {
+            markedCheckbox.checked = b.marked === "Yes";
+          }
         });
         updateTotalClients();
       }
@@ -838,7 +864,6 @@
     stepPills.forEach((pill) => {
       pill.classList.toggle("active", Number(pill.dataset.stepPill) === step);
     });
-    // كل مرة تغير step نحفظ فى localStorage
     saveSessionToLocalStorage();
   }
 
@@ -910,10 +935,12 @@
   function createBookingRow() {
     const row = document.createElement("tr");
 
+    // 0 - index
     const indexCell = document.createElement("td");
     indexCell.textContent = (bookingsBody.children.length + 1).toString();
     row.appendChild(indexCell);
 
+    // 1 - name
     const nameCell = document.createElement("td");
     const nameInput = document.createElement("input");
     nameInput.type = "text";
@@ -921,6 +948,7 @@
     nameCell.appendChild(nameInput);
     row.appendChild(nameCell);
 
+    // 2 - phone
     const phoneCell = document.createElement("td");
     const phoneInput = document.createElement("input");
     phoneInput.type = "tel";
@@ -928,6 +956,7 @@
     phoneCell.appendChild(phoneInput);
     row.appendChild(phoneCell);
 
+    // 3 - session no
     const sessionNoCell = document.createElement("td");
     const sessionNoInput = document.createElement("input");
     sessionNoInput.type = "number";
@@ -936,12 +965,14 @@
     sessionNoCell.appendChild(sessionNoInput);
     row.appendChild(sessionNoCell);
 
+    // 4 - session date
     const sessionDateCell = document.createElement("td");
     const sessionDateInput = document.createElement("input");
     sessionDateInput.type = "date";
     sessionDateCell.appendChild(sessionDateInput);
     row.appendChild(sessionDateCell);
 
+    // 5 - service
     const serviceCell = document.createElement("td");
     const serviceInput = document.createElement("input");
     serviceInput.type = "text";
@@ -949,6 +980,7 @@
     serviceCell.appendChild(serviceInput);
     row.appendChild(serviceCell);
 
+    // 6 - platform
     const platformCell = document.createElement("td");
     const platformSelect = document.createElement("select");
     ["", "facebook", "Instagram", "whatsapp", "phone call"].forEach((val) => {
@@ -960,6 +992,7 @@
     platformCell.appendChild(platformSelect);
     row.appendChild(platformCell);
 
+    // 7 - branch
     const branchCell = document.createElement("td");
     const branchSelect = document.createElement("select");
     ["", "You Clinic", "Scar Clinic"].forEach((val) => {
@@ -971,12 +1004,21 @@
     branchCell.appendChild(branchSelect);
     row.appendChild(branchCell);
 
+    // 8 - New?
+    const newCell = document.createElement("td");
+    const newCheckbox = document.createElement("input");
+    newCheckbox.type = "checkbox";
+    newCell.appendChild(newCheckbox);
+    row.appendChild(newCell);
+
+    // 9 - Marked
     const markedCell = document.createElement("td");
     const markedCheckbox = document.createElement("input");
     markedCheckbox.type = "checkbox";
     markedCell.appendChild(markedCheckbox);
     row.appendChild(markedCell);
 
+    // 10 - actions
     const actionsCell = document.createElement("td");
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
@@ -1004,6 +1046,9 @@
       const tds = tr.querySelectorAll("td");
       const getInput = (cellIdx) => tds[cellIdx].querySelector("input, select");
 
+      const newCheckbox = tds[8].querySelector("input[type='checkbox']");
+      const markedCheckbox = tds[9].querySelector("input[type='checkbox']");
+
       data.push({
         index: idx + 1,
         name: getInput(1)?.value.trim() || "",
@@ -1013,7 +1058,8 @@
         service: getInput(5)?.value.trim() || "",
         platform: getInput(6)?.value || "",
         branch: getInput(7)?.value || "",
-        marked: tds[8].querySelector("input[type='checkbox']").checked ? "Yes" : "No",
+        isNew: newCheckbox && newCheckbox.checked ? "Yes" : "No",
+        marked: markedCheckbox && markedCheckbox.checked ? "Yes" : "No",
       });
     });
     return data;
@@ -1043,6 +1089,19 @@
       syncStatusText.textContent = "Saved locally – DB error";
       alert("PDF generated but could not sync to database: " + (err.message || err));
       return false;
+    }
+  }
+
+  function addPdfFooter(doc) {
+    const footerText =
+      "Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan ©";
+    const pageCount = doc.internal.getNumberOfPages();
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(8);
+
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.text(footerText, 14, 285);
     }
   }
 
@@ -1116,16 +1175,20 @@
       b.service,
       b.platform,
       b.branch,
+      b.isNew,
       b.marked,
     ]);
 
     doc.autoTable({
       startY: y,
-      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"]],
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "New?", "Marked"]],
       body: tableBody,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [56, 189, 248] },
     });
+
+    // Footer on all PDF pages
+    addPdfFooter(doc);
 
     const fileName = `${moderator || "Moderator"}-${date || "report"}-ScarGroup.pdf`;
     doc.save(fileName);
@@ -1346,7 +1409,6 @@
       saveSessionToLocalStorage();
     });
 
-    // فى الآخر: حمّل الـ session اللى فى localStorage (هترجعك لنفس الـ step)
     loadSessionFromLocalStorage();
   });
 </script>
