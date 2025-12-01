@@ -151,7 +151,7 @@
 
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 10px;
       align-items: end;
     }
@@ -241,6 +241,10 @@
       font-size: 11px;
     }
 
+    .btn-block-mobile {
+      width: auto;
+    }
+
     .badge {
       display: inline-flex;
       align-items: center;
@@ -288,7 +292,7 @@
       border-radius: 16px;
       background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98) 40%, #020617 100%);
       border: 1px solid rgba(55, 65, 81, 0.9);
-      overflow: hidden;
+      overflow-x: auto;
       box-shadow: var(--shadow-sm);
     }
 
@@ -296,6 +300,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 12px;
+      min-width: 700px;
     }
 
     thead {
@@ -323,6 +328,7 @@
       padding: 8px 9px;
       border-bottom: 1px solid rgba(31, 41, 55, 0.9);
       color: var(--text-main);
+      white-space: nowrap;
     }
 
     tbody tr:hover {
@@ -336,6 +342,8 @@
       padding: 10px 11px;
       border-top: 1px solid rgba(31, 41, 55, 0.9);
       background: rgba(15, 23, 42, 0.98);
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .actions-cell {
@@ -410,7 +418,7 @@
 
     .login-shell {
       max-width: 360px;
-      margin: 80px auto;
+      margin: 40px auto 80px;
     }
 
     .login-card {
@@ -496,6 +504,18 @@
     }
 
     @media (max-width: 900px) {
+      body {
+        align-items: stretch;
+      }
+
+      .shell {
+        padding: 16px 12px 24px;
+      }
+
+      .card {
+        padding: 16px 14px 18px;
+      }
+
       .filters-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
       }
@@ -512,6 +532,11 @@
       .filters-actions {
         justify-content: flex-start;
       }
+
+      .btn-block-mobile {
+        width: 100%;
+        justify-content: center;
+      }
     }
 
     @media (max-width: 640px) {
@@ -519,29 +544,22 @@
         grid-template-columns: 1fr;
       }
 
-      .btn-block-mobile {
-        width: 100%;
-        justify-content: center;
+      .shell {
+        padding: 16px 10px 22px;
+      }
+
+      .card {
+        border-radius: 18px;
+      }
+
+      table {
+        font-size: 11px;
+        min-width: 650px;
       }
 
       .table-footer {
         flex-direction: column;
         align-items: flex-start;
-        gap: 6px;
-      }
-
-      thead th:nth-child(4),
-      thead th:nth-child(5),
-      thead th:nth-child(6),
-      thead th:nth-child(7) {
-        display: none;
-      }
-
-      tbody td:nth-child(4),
-      tbody td:nth-child(5),
-      tbody td:nth-child(6),
-      tbody td:nth-child(7) {
-        display: none;
       }
     }
 
@@ -638,8 +656,8 @@
             </div>
 
             <div class="filter-group">
-              <label for="dateMode">Date filter by</label>
-              <select id="dateMode">
+              <label for="dateFilterMode">Filter by</label>
+              <select id="dateFilterMode">
                 <option value="report">Report date</option>
                 <option value="session">Session date</option>
               </select>
@@ -652,16 +670,12 @@
 
             <div class="filter-group">
               <label for="toDate">To date</label>
-              <input type="date" id="toDate" />
-            </div>
-
-            <div class="filter-group">
-              <label>&nbsp;</label>
               <div class="filters-actions">
-                <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small btn-block-mobile">
+                <input type="date" id="toDate" style="flex:1; min-width:0;" />
+                <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small" style="margin-left:4px;">
                   Reset
                 </button>
-                <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small btn-block-mobile">
+                <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small">
                   Apply
                 </button>
               </div>
@@ -669,7 +683,7 @@
           </div>
         </div>
 
-        <div style="margin-top:4px; margin-bottom:8px;">
+        <div style="margin-top:4px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:8px;">
           <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
             📥 Download performance PDF (current filter)
           </button>
@@ -725,18 +739,11 @@
 </div>
 
 <script type="module">
-  import {
-    initializeApp
-  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
   import {
     getFirestore,
     collection,
     getDocs,
-    deleteDoc,
-    doc,
-    updateDoc,
-    addDoc,
-    serverTimestamp,
     orderBy,
     query
   } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
@@ -760,7 +767,7 @@
 
   const filterModerator = document.getElementById("filterModerator");
   const filterNew = document.getElementById("filterNew");
-  const dateModeSelect = document.getElementById("dateMode");
+  const dateFilterMode = document.getElementById("dateFilterMode");
   const fromDateInput = document.getElementById("fromDate");
   const toDateInput = document.getElementById("toDate");
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
@@ -833,95 +840,109 @@
     return false;
   }
 
-  function reportMatchesDateFilter(report, dateMode, from, to) {
-    if (!from && !to) return true;
-
-    if (dateMode === "session") {
-      const bookings = Array.isArray(report.bookings) ? report.bookings : [];
-      if (!bookings.length) return false;
-      return bookings.some((b) => {
-        const sd = b.sessionDate || "";
-        if (!sd) return false;
-        if (from && sd < from) return false;
-        if (to && sd > to) return false;
-        return true;
-      });
-    } else {
-      const d = report.date || "";
-      if (!d) return false;
-      if (from && d < from) return false;
-      if (to && d > to) return false;
-      return true;
-    }
-  }
-
-  function computeReportTotals(report, dateMode, from, to) {
-    const allBookings = Array.isArray(report.bookings) ? report.bookings : [];
-    let bookings = allBookings;
-
-    if (dateMode === "session" && (from || to)) {
-      bookings = allBookings.filter((b) => {
-        const sd = b.sessionDate || "";
-        if (!sd) return false;
-        if (from && sd < from) return false;
-        if (to && sd > to) return false;
-        return true;
-      });
-    }
-
-    let total = 0;
-    let scar = 0;
-    let you = 0;
-    let totalNew = 0;
-
-    bookings.forEach((b) => {
-      total++;
-      if (bookingIsNew(b)) totalNew++;
-      const branchName = (b.branch || report.branch || report.clinic || "").toLowerCase();
-      if (branchName.includes("you")) {
-        you++;
-      } else {
-        scar++;
-      }
-    });
-
-    return { total, scar, you, totalNew };
-  }
-
   function applyFilters() {
     errorBox.style.display = "none";
+
     const mod = filterModerator.value;
     const newFilter = filterNew.value;
     const from = fromDateInput.value;
     const to = toDateInput.value;
-    const dateMode = dateModeSelect.value || "report";
+    const dateMode = dateFilterMode.value || "report";
 
-    filteredReports = allReports.filter((r) => {
-      if (mod !== "All" && r.moderator !== mod) return false;
+    const newFilteredReports = [];
 
-      if (!reportMatchesDateFilter(r, dateMode, from, to)) return false;
+    allReports.forEach((r) => {
+      // Filter by moderator
+      if (mod !== "All" && r.moderator !== mod) return;
 
-      if (newFilter !== "All") {
-        const bookings = Array.isArray(r.bookings) ? r.bookings : [];
-        const hasNew = bookings.some((b) => bookingIsNew(b));
+      const bookingsArray = Array.isArray(r.bookings) ? r.bookings : [];
 
-        if (newFilter === "New" && !hasNew) return false;
-        if (newFilter === "NotNew" && hasNew) return false;
+      // Date filter when mode = report (على مستوى الريبورت)
+      let passesReportDate = true;
+      if (dateMode === "report") {
+        if (from && r.date && r.date < from) passesReportDate = false;
+        if (to && r.date && r.date > to) passesReportDate = false;
       }
 
-      return true;
+      if (dateMode === "report" && !passesReportDate) {
+        return;
+      }
+
+      // فلترة الـ bookings بناءً على New + Session date عند الحاجة
+      const filteredBookings = bookingsArray.filter((b) => {
+        const isNew = bookingIsNew(b);
+
+        if (newFilter === "New" && !isNew) return false;
+        if (newFilter === "NotNew" && isNew) return false;
+
+        if (dateMode === "session") {
+          const dateStr = b.sessionDate || "";
+          if (from && dateStr && dateStr < from) return false;
+          if (to && dateStr && dateStr > to) return false;
+        }
+
+        return true;
+      });
+
+      // نقرر نعرض الريبورت ولا لأ
+      let includeReport = true;
+      if (dateMode === "session") {
+        // لو مفيش ولا booking بعد فلترة الـ session date يبقى الريبورت مش داخل الفلتر
+        includeReport = filteredBookings.length > 0;
+      } else {
+        // report date mode
+        if (newFilter === "New" || newFilter === "NotNew") {
+          // لازم يبقى في bookings مطابقة للـ new filter
+          includeReport = filteredBookings.length > 0;
+        }
+      }
+
+      if (!includeReport) return;
+
+      // حساب التوتال بناء على الـ filteredBookings لو موجودة
+      let visibleTotals;
+      let visibleTotalNew;
+
+      const baseBookingsForTotals =
+        (dateMode === "session" || newFilter !== "All") && filteredBookings.length
+          ? filteredBookings
+          : bookingsArray;
+
+      if (baseBookingsForTotals.length) {
+        let total = 0, scar = 0, you = 0, totalNew = 0;
+        baseBookingsForTotals.forEach((b) => {
+          total++;
+          if (bookingIsNew(b)) totalNew++;
+          const branch = (b.branch || r.branch || r.clinic || "").toLowerCase();
+          if (branch.includes("you")) you++;
+          else scar++;
+        });
+        visibleTotals = { total, scar, you };
+        visibleTotalNew = totalNew;
+      } else {
+        visibleTotals = r.totals || { total: 0, scar: 0, you: 0 };
+        visibleTotalNew = r.totalNew ?? 0;
+      }
+
+      const visibleBookings = (dateMode === "session" || newFilter !== "All")
+        ? filteredBookings
+        : bookingsArray;
+
+      newFilteredReports.push({
+        ...r,
+        visibleBookings,
+        visibleTotals,
+        visibleTotalNew
+      });
     });
 
+    filteredReports = newFilteredReports;
     renderTable();
   }
 
   function renderTable() {
     reportsBody.innerHTML = "";
     let totalClients = 0;
-
-    const from = fromDateInput.value;
-    const to = toDateInput.value;
-    const dateMode = dateModeSelect.value || "report";
 
     filteredReports.forEach((report) => {
       const tr = document.createElement("tr");
@@ -943,13 +964,14 @@
       const scarTd = document.createElement("td");
       const youTd = document.createElement("td");
 
-      const totals = computeReportTotals(report, dateMode, from, to);
+      const tot = report.visibleTotals || report.totals || {};
+      const totalNew = report.visibleTotalNew ?? report.totalNew ?? 0;
 
-      totalTd.textContent = totals.total.toString();
-      totalNewTd.textContent = totals.totalNew.toString();
-      scarTd.textContent = totals.scar.toString();
-      youTd.textContent = totals.you.toString();
-      totalClients += totals.total;
+      totalTd.textContent = (tot.total ?? 0).toString();
+      totalNewTd.textContent = totalNew.toString();
+      scarTd.textContent = (tot.scar ?? 0).toString();
+      youTd.textContent = (tot.you ?? 0).toString();
+      totalClients += tot.total ?? 0;
 
       tr.appendChild(totalTd);
       tr.appendChild(totalNewTd);
@@ -965,7 +987,7 @@
 
       const viewBtn = document.createElement("button");
       viewBtn.className = "btn-icon";
-      viewBtn.title = "Download single report PDF";
+      viewBtn.title = "Download single report PDF (current filter)";
       viewBtn.textContent = "⬇";
       viewBtn.addEventListener("click", () => downloadSingleReportPDF(report));
       actionsTd.appendChild(viewBtn);
@@ -1002,9 +1024,12 @@
       checkIn,
       checkOut,
       totals,
-      bookings = [],
       clinic
     } = report;
+
+    const bookingsArray = Array.isArray(report.visibleBookings || report.bookings)
+      ? (report.visibleBookings || report.bookings)
+      : [];
 
     let y = 14;
     doc.setFontSize(16);
@@ -1044,16 +1069,16 @@
     }
 
     doc.setFont("helvetica", "bold");
-    doc.text("Clients Summary", 14, y); y += 6;
+    doc.text("Clients Summary (current filter)", 14, y); y += 6;
     doc.setFont("helvetica", "normal");
 
-    const bookingsArray = Array.isArray(bookings) ? bookings : [];
     const totalNew = bookingsArray.reduce((acc, b) => acc + (bookingIsNew(b) ? 1 : 0), 0);
+    const visTotals = report.visibleTotals || totals || { total: 0, scar: 0, you: 0 };
 
-    doc.text(`Total clients: ${totals?.total ?? 0}`, 14, y); y += 5;
+    doc.text(`Total clients: ${visTotals.total ?? 0}`, 14, y); y += 5;
     doc.text(`Total new: ${totalNew}`, 14, y); y += 5;
-    doc.text(`Scar Clinic clients: ${totals?.scar ?? 0}`, 14, y); y += 5;
-    doc.text(`You Clinic clients: ${totals?.you ?? 0}`, 14, y); y += 6;
+    doc.text(`Scar Clinic clients: ${visTotals.scar ?? 0}`, 14, y); y += 5;
+    doc.text(`You Clinic clients: ${visTotals.you ?? 0}`, 14, y); y += 6;
 
     const tableBody = bookingsArray.map((b, idx) => [
       (idx + 1).toString(),
@@ -1102,11 +1127,9 @@
     const from = fromDateInput.value || "Any";
     const to = toDateInput.value || "Any";
     const newFilter = filterNew.value || "All";
-    const dateMode = dateModeSelect.value || "report";
-    const dateModeLabel = dateMode === "session" ? "Session date" : "Report date";
-
+    const dateModeLabel = dateFilterMode.value === "session" ? "Session Date" : "Report Date";
     doc.text(
-      `Filter – Moderator: ${mod}, Date by: ${dateModeLabel}, New: ${newFilter}, From: ${from}, To: ${to}`,
+      `Filter – Moderator: ${mod}, New: ${newFilter}, Date mode: ${dateModeLabel}, From: ${from}, To: ${to}`,
       14,
       y
     );
@@ -1117,19 +1140,16 @@
     let totalYou = 0;
     let totalNew = 0;
 
-    const fromRaw = fromDateInput.value;
-    const toRaw = toDateInput.value;
-
     filteredReports.forEach((r) => {
-      const t = computeReportTotals(r, dateMode, fromRaw, toRaw);
-      totalClients += t.total;
-      totalScar += t.scar;
-      totalYou += t.you;
-      totalNew += t.totalNew;
+      const vt = r.visibleTotals || r.totals || {};
+      totalClients += (vt.total || 0);
+      totalScar += (vt.scar || 0);
+      totalYou += (vt.you || 0);
+      totalNew += (r.visibleTotalNew ?? r.totalNew ?? 0);
     });
 
     doc.setFont("helvetica", "bold");
-    doc.text("Summary", 14, y); y += 6;
+    doc.text("Summary (current filter)", 14, y); y += 6;
     doc.setFont("helvetica", "normal");
     doc.text(`Reports: ${filteredReports.length}`, 14, y); y += 5;
     doc.text(`Total clients: ${totalClients}`, 14, y); y += 5;
@@ -1138,15 +1158,16 @@
     doc.text(`You Clinic: ${totalYou}`, 14, y); y += 8;
 
     const tableBody = filteredReports.map((r) => {
-      const t = computeReportTotals(r, dateMode, fromRaw, toRaw);
+      const vt = r.visibleTotals || r.totals || {};
+      const tNew = r.visibleTotalNew ?? r.totalNew ?? 0;
       return [
         r.date || "",
         r.moderator || "",
         r.shiftLabel || "",
-        t.total,
-        t.totalNew,
-        t.scar,
-        t.you,
+        vt.total ?? 0,
+        tNew,
+        vt.scar ?? 0,
+        vt.you ?? 0,
       ];
     });
 
@@ -1178,23 +1199,13 @@
     const scarRows = [];
     const youRows = [];
 
-    const dateMode = dateModeSelect.value || "report";
-    const from = fromDateInput.value;
-    const to = toDateInput.value;
-
     filteredReports.forEach((report) => {
       const reportDate = report.date || "";
-      const bookings = Array.isArray(report.bookings) ? report.bookings : [];
+      const bookings = Array.isArray(report.visibleBookings || report.bookings)
+        ? (report.visibleBookings || report.bookings)
+        : [];
 
       bookings.forEach((b) => {
-        // فلترة بالـ session date لو متختار Session
-        if (dateMode === "session" && (from || to)) {
-          const sd = b.sessionDate || "";
-          if (!sd) return;
-          if (from && sd < from) return;
-          if (to && sd > to) return;
-        }
-
         const branch = b.branch || report.branch || report.clinic || "";
         const branchName = (branch || "").toLowerCase();
 
@@ -1291,9 +1302,10 @@
     XLSX.utils.book_append_sheet(wb, youSheet, "You");
 
     const mod = filterModerator.value || "All";
-    const fromLabel = fromDateInput.value || "Any";
-    const toLabel = toDateInput.value || "Any";
-    const fileName = `Bookings-${mod}-${fromLabel}-${toLabel}.xlsx`;
+    const from = fromDateInput.value || "Any";
+    const to = toDateInput.value || "Any";
+    const mode = dateFilterMode.value === "session" ? "Session" : "Report";
+    const fileName = `Bookings-${mod}-${from}-${to}-${mode}.xlsx`;
     XLSX.writeFile(wb, fileName);
   }
 
@@ -1320,7 +1332,6 @@
       });
 
       filteredReports = allReports.slice();
-      applyFilters();
 
       const moderatorsSet = new Set(["All"]);
       allReports.forEach((r) => {
@@ -1339,6 +1350,8 @@
         filterModerator.value = currentValue;
       }
 
+      applyFilters();
+
       setConnectionStatus(true, "Connected");
     } catch (e) {
       console.error(e);
@@ -1355,7 +1368,7 @@
     resetFiltersBtn.addEventListener("click", () => {
       filterModerator.value = "All";
       filterNew.value = "All";
-      dateModeSelect.value = "report";
+      dateFilterMode.value = "report";
       fromDateInput.value = "";
       toDateInput.value = "";
       applyFilters();
@@ -1367,8 +1380,8 @@
     loadReports();
   }
 
-  // Login handler (مع معالجة الـ lowercase والـ spaces) – اتربط مباشرة عشان يشتغل على طول
-  if (loginForm) {
+  // Login handler (مع معالجة الـ lowercase والـ spaces)
+  document.addEventListener("DOMContentLoaded", () => {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const usernameInput = (loginUsername.value || "").trim();
@@ -1386,7 +1399,7 @@
         loginError.style.display = "block";
       }
     });
-  }
+  });
 </script>
 </body>
 </html>
