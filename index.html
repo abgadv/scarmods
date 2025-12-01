@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Moderators Daily Report</title>
+  <title>Moderators Daily Report – Scar Group</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- jsPDF + AutoTable -->
@@ -11,16 +11,19 @@
 
   <style>
     :root {
-      --bg: #f5f7fb;
-      --card-bg: #ffffff;
-      --primary: #1f6feb;
-      --primary-dark: #164db3;
-      --border: #d6d9e0;
-      --text-main: #111827;
-      --text-muted: #6b7280;
-      --danger: #dc2626;
-      --success: #16a34a;
-      --shadow-soft: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --bg: #0b1220;
+      --card-bg: #020617;
+      --primary: #38bdf8;
+      --primary-soft: rgba(56, 189, 248, 0.15);
+      --primary-dark: #0891b2;
+      --border: #1f2937;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --danger-strong: #ef4444;
+      --success: #4ade80;
+      --success-strong: #22c55e;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.6);
     }
 
     * {
@@ -31,7 +34,7 @@
     body {
       margin: 0;
       padding: 0;
-      background: radial-gradient(circle at top, #e0ebff, #f5f7fb 40%);
+      background: radial-gradient(circle at top, #082f49, #020617 50%);
       min-height: 100vh;
       color: var(--text-main);
       display: flex;
@@ -42,14 +45,15 @@
     .app-shell {
       width: 100%;
       max-width: 980px;
-      margin: 16px;
+      margin: 18px 12px;
     }
 
     .card {
-      background: var(--card-bg);
+      background: radial-gradient(circle at top left, #0f172a, #020617 55%);
       border-radius: 24px;
       box-shadow: var(--shadow-soft);
       padding: 20px 18px;
+      border: 1px solid rgba(148, 163, 184, 0.15);
     }
 
     @media (min-width: 768px) {
@@ -97,12 +101,13 @@
       display: flex;
       align-items: center;
       gap: 4px;
+      background: rgba(15, 23, 42, 0.8);
     }
 
     .step-pill.active {
-      background: rgba(31, 111, 235, 0.08);
+      background: var(--primary-soft);
       border-color: var(--primary);
-      color: var(--primary-dark);
+      color: var(--primary);
       font-weight: 600;
     }
 
@@ -114,7 +119,7 @@
       justify-content: center;
       align-items: center;
       font-size: 0.7rem;
-      background: #e5edff;
+      background: rgba(15, 23, 42, 0.85);
     }
 
     .form-grid {
@@ -154,15 +159,20 @@
       border: 1px solid var(--border);
       font-size: 0.9rem;
       outline: none;
-      background: #f9fafb;
+      background: #020617;
+      color: var(--text-main);
       transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+    }
+
+    input::placeholder {
+      color: #6b7280;
     }
 
     input:focus,
     select:focus {
       border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(31, 111, 235, 0.15);
-      background: #ffffff;
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      background: #020617;
     }
 
     .small-hint {
@@ -181,29 +191,31 @@
       align-items: center;
       justify-content: center;
       gap: 6px;
-      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease, opacity 0.15s ease;
       white-space: nowrap;
     }
 
     .btn-primary {
-      background: var(--primary);
-      color: #ffffff;
-      box-shadow: 0 8px 18px rgba(31, 111, 235, 0.25);
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #0b1120;
+      box-shadow: 0 12px 24px rgba(56, 189, 248, 0.4);
     }
 
     .btn-primary:hover {
-      background: var(--primary-dark);
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
       transform: translateY(-1px);
-      box-shadow: 0 10px 22px rgba(31, 111, 235, 0.32);
+      box-shadow: 0 16px 30px rgba(56, 189, 248, 0.55);
     }
 
     .btn-secondary {
-      background: #eef2ff;
-      color: var(--primary-dark);
+      background: rgba(15, 23, 42, 0.9);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
     }
 
     .btn-secondary:hover {
-      background: #e0e7ff;
+      background: rgba(15, 23, 42, 1);
+      color: var(--text-main);
     }
 
     .btn-ghost {
@@ -213,11 +225,11 @@
       padding-block: 7px;
       font-weight: 500;
       color: var(--danger);
-      border: 1px solid rgba(220, 38, 38, 0.2);
+      border: 1px solid rgba(239, 68, 68, 0.45);
     }
 
     .btn-ghost:hover {
-      background: rgba(220, 38, 38, 0.05);
+      background: rgba(239, 68, 68, 0.08);
     }
 
     .btn-block {
@@ -245,8 +257,9 @@
       margin-top: 4px;
       border-radius: 999px;
       padding: 4px 10px;
-      background: #f3f4f6;
+      background: rgba(15, 23, 42, 0.9);
       color: var(--text-muted);
+      border: 1px solid var(--border);
     }
 
     .check-status span.dot {
@@ -257,8 +270,9 @@
     }
 
     .check-status.early {
-      background: #ecfdf3;
-      color: var(--success);
+      background: rgba(34, 197, 94, 0.1);
+      color: var(--success-strong);
+      border-color: rgba(34, 197, 94, 0.4);
     }
 
     .check-status.early span.dot {
@@ -266,8 +280,9 @@
     }
 
     .check-status.late {
-      background: #fef2f2;
-      color: var(--danger);
+      background: rgba(248, 113, 113, 0.12);
+      color: var(--danger-strong);
+      border-color: rgba(239, 68, 68, 0.5);
     }
 
     .check-status.late span.dot {
@@ -275,12 +290,13 @@
     }
 
     .check-status.ontime {
-      background: #eff6ff;
-      color: var(--primary-dark);
+      background: rgba(56, 189, 248, 0.1);
+      color: var(--primary);
+      border-color: rgba(56, 189, 248, 0.5);
     }
 
     .check-status.ontime span.dot {
-      background: var(--primary-dark);
+      background: var(--primary);
     }
 
     .check-display {
@@ -297,11 +313,10 @@
       display: block;
     }
 
-    /* Bookings table */
     .table-wrapper {
       border-radius: 14px;
       border: 1px solid var(--border);
-      background: #f9fafb;
+      background: radial-gradient(circle at top left, #020617, #020617 50%);
       padding: 10px;
       overflow-x: auto;
     }
@@ -311,17 +326,18 @@
       border-collapse: collapse;
       font-size: 0.8rem;
       min-width: 780px;
+      color: var(--text-main);
     }
 
     th,
     td {
       padding: 6px 8px;
       text-align: left;
-      border-bottom: 1px solid #e5e7eb;
+      border-bottom: 1px solid #111827;
     }
 
     thead {
-      background: #eef2ff;
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.7));
     }
 
     th {
@@ -335,6 +351,9 @@
       font-size: 0.78rem;
       padding: 4px 6px;
       border-radius: 8px;
+      background: #020617;
+      border-color: #111827;
+      color: var(--text-main);
     }
 
     td input[type="checkbox"] {
@@ -359,9 +378,10 @@
       gap: 6px;
       padding: 3px 8px;
       border-radius: 999px;
-      background: #eef2ff;
+      background: rgba(15, 23, 42, 0.9);
       font-size: 0.78rem;
-      color: var(--primary-dark);
+      color: var(--primary);
+      border: 1px solid rgba(56, 189, 248, 0.4);
     }
 
     .badge strong {
@@ -369,8 +389,26 @@
     }
 
     .divider {
-      border-top: 1px dashed #e5e7eb;
+      border-top: 1px dashed #1f2937;
       margin: 12px 0;
+    }
+
+    .status-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: #4ade80;
     }
 
     @media (max-width: 600px) {
@@ -411,7 +449,7 @@
     <div class="header">
       <div class="title-block">
         <h1>Moderators Daily Report</h1>
-        <span>Track attendance, performance & bookings in one place.</span>
+        <span>Track attendance & bookings, then sync to dashboard.</span>
       </div>
       <div class="step-indicator">
         <div class="step-pill active" data-step-pill="1">
@@ -430,13 +468,13 @@
     <section class="section active" id="section-1">
       <div class="form-grid">
         <div class="field">
-          <label for="reportDate">Date<span style="color:#dc2626">*</span></label>
+          <label for="reportDate">Date<span style="color:#f97373">*</span></label>
           <input type="date" id="reportDate" required />
           <div class="small-hint">Select report date (defaults to today).</div>
         </div>
 
         <div class="field">
-          <label for="moderatorName">Moderator Name<span style="color:#dc2626">*</span></label>
+          <label for="moderatorName">Moderator Name<span style="color:#f97373">*</span></label>
           <select id="moderatorName" required>
             <option value="">Select moderator</option>
             <option>Shahd</option>
@@ -450,7 +488,7 @@
         </div>
 
         <div class="field">
-          <label for="shift">Shift<span style="color:#dc2626">*</span></label>
+          <label for="shift">Shift<span style="color:#f97373">*</span></label>
           <select id="shift" required>
             <option value="">Select shift</option>
             <option value="9-17">9 am : 5 pm</option>
@@ -541,7 +579,6 @@
           </tr>
           </thead>
           <tbody id="bookingsBody">
-          <!-- Rows added dynamically -->
           </tbody>
         </table>
       </div>
@@ -586,8 +623,11 @@
         <div class="field">
           <label>Summary</label>
           <div class="small-hint">
-            When you’re ready, click <strong>Send Data</strong> to generate the PDF report
-            with all shift & bookings details.
+            Click <strong>Send Data</strong> to generate the PDF and sync this report to the admin dashboard.
+          </div>
+          <div style="margin-top:8px;" class="status-chip">
+            <span class="status-dot"></span>
+            <span id="syncStatusText">Ready</span>
           </div>
         </div>
       </div>
@@ -598,23 +638,44 @@
         <button type="button" id="backTo2" class="btn btn-secondary btn-block-mobile">
           ← Back
         </button>
-        <button type="button" id="newSessionBtn" class="btn btn-secondary btn-block-mobile">
-          🆕 New Session
-        </button>
         <button type="button" id="sendDataBtn" class="btn btn-primary btn-block btn-block-mobile">
-          📄 Send Data (Generate PDF)
+          📄 Send Data (PDF + Sync)
+        </button>
+        <button type="button" id="newSessionBtn" class="btn btn-secondary btn-block-mobile">
+          New session
         </button>
       </div>
     </section>
   </div>
 </div>
 
-<script>
-  const STORAGE_KEY = "moderators_daily_report_v2";
+<!-- FIREBASE + LOGIC -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    addDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDpG7Ja5HCfU2RnGJuxXU5ypPA7JKgYY7U",
+    authDomain: "clinic-725a7.firebaseapp.com",
+    projectId: "clinic-725a7",
+    storageBucket: "clinic-725a7.firebasestorage.app",
+    messagingSenderId: "644725580556",
+    appId: "1:644725580556:web:a5947d966e711888125f29",
+    measurementId: "G-82J5FZ1M07"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
 
   // --- State ---
   let checkInTime = null;
   let checkOutTime = null;
+  let activeStep = 1; // عشان نرجع لنفس الـ step بعد الريفريش
 
   // DOM shortcuts
   const section1 = document.getElementById("section-1");
@@ -648,25 +709,137 @@
   const bookingsBody = document.getElementById("bookingsBody");
   const totalClientsSpan = document.getElementById("totalClients");
 
-  // --- Helpers ---
+  const syncStatusText = document.getElementById("syncStatusText");
+
+  // -------- Local Storage --------
+  const STORAGE_KEY = "scarGroupModeratorsSessionV1";
+
+  function pad2(num) {
+    return num.toString().padStart(2, "0");
+  }
+
+  function saveSessionToLocalStorage() {
+    try {
+      const payload = {
+        date: reportDateInput.value || "",
+        moderator: moderatorSelect.value || "",
+        shiftValue: shiftSelect.value || "",
+        coverFor: coverForInput.value || "",
+        coverShift: coverShiftInput.value || "",
+        checkInTime: checkInTime ? checkInTime.toISOString() : null,
+        checkOutTime: checkOutTime ? checkOutTime.toISOString() : null,
+        bookings: collectBookingsData(),
+        activeStep // هنا بنحفظ انت واقف فى أنهي step
+      };
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    } catch (e) {
+      console.error("Error saving session to localStorage", e);
+    }
+  }
+
+  function clearSessionFromLocalStorage() {
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {
+      console.error("Error clearing session from localStorage", e);
+    }
+  }
+
+  function loadSessionFromLocalStorage() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) {
+        setActiveSection(1);
+        return;
+      }
+      const saved = JSON.parse(raw);
+      if (!saved) {
+        setActiveSection(1);
+        return;
+      }
+
+      if (saved.date) reportDateInput.value = saved.date;
+      if (saved.moderator) moderatorSelect.value = saved.moderator;
+      if (saved.shiftValue) shiftSelect.value = saved.shiftValue;
+
+      if (shiftSelect.value === "cover") {
+        coverDetails.style.display = "block";
+        coverForInput.value = saved.coverFor || "";
+        coverShiftInput.value = saved.coverShift || "";
+      }
+
+      if (Array.isArray(saved.bookings) && saved.bookings.length) {
+        bookingsBody.innerHTML = "";
+        saved.bookings.forEach((b) => {
+          createBookingRow();
+          const row = bookingsBody.lastElementChild;
+          const tds = row.querySelectorAll("td");
+
+          tds[1].querySelector("input").value = b.name || "";
+          tds[2].querySelector("input").value = b.phone || "";
+          tds[3].querySelector("input").value = b.sessionNumber || "";
+          tds[4].querySelector("input").value = b.sessionDate || "";
+          tds[5].querySelector("input").value = b.service || "";
+          tds[6].querySelector("select").value = b.platform || "";
+          tds[7].querySelector("select").value = b.branch || "";
+          tds[8].querySelector("input[type='checkbox']").checked = b.marked === "Yes";
+        });
+        updateTotalClients();
+      }
+
+      const dateStr = reportDateInput.value;
+      const shiftValue = shiftSelect.value;
+      const { start, end } = getShiftTimes(dateStr, shiftValue);
+
+      if (saved.checkInTime) {
+        checkInTime = new Date(saved.checkInTime);
+        checkInDisplay.textContent = `Checked in at: ${formatDateTime(checkInTime)}`;
+        if (!start || shiftValue === "cover") {
+          checkInStatus.style.display = "inline-flex";
+          checkInStatus.classList.remove("early", "late", "ontime");
+          checkInStatus.classList.add("ontime");
+          checkInStatus.querySelector(".text").textContent = "No reference shift (cover).";
+        } else {
+          const diffMinutes = (checkInTime - start) / (1000 * 60);
+          setStatusElement(checkInStatus, diffMinutes, "in", false);
+        }
+      }
+
+      if (saved.checkOutTime) {
+        checkOutTime = new Date(saved.checkOutTime);
+        checkOutDisplay.textContent = `Checked out at: ${formatDateTime(checkOutTime)}`;
+        if (!end || shiftValue === "cover") {
+          checkOutStatus.style.display = "inline-flex";
+          checkOutStatus.classList.remove("early", "late", "ontime");
+          checkOutStatus.classList.add("ontime");
+          checkOutStatus.querySelector(".text").textContent = "No reference shift (cover).";
+        } else {
+          const diffMinutes = (checkOutTime - end) / (1000 * 60);
+          setStatusElement(checkOutStatus, diffMinutes, "out", true);
+        }
+      }
+
+      if (typeof saved.activeStep === "number" && saved.activeStep >= 1 && saved.activeStep <= 3) {
+        setActiveSection(saved.activeStep);
+      } else {
+        setActiveSection(1);
+      }
+    } catch (e) {
+      console.error("Error loading session from localStorage", e);
+      setActiveSection(1);
+    }
+  }
 
   function setActiveSection(step) {
+    activeStep = step;
     [section1, section2, section3].forEach((sec, idx) => {
       sec.classList.toggle("active", idx + 1 === step);
     });
     stepPills.forEach((pill) => {
       pill.classList.toggle("active", Number(pill.dataset.stepPill) === step);
     });
-  }
-
-  function getActiveStep() {
-    if (section3.classList.contains("active")) return 3;
-    if (section2.classList.contains("active")) return 2;
-    return 1;
-  }
-
-  function pad2(num) {
-    return num.toString().padStart(2, "0");
+    // كل مرة تغير step نحفظ فى localStorage
+    saveSessionToLocalStorage();
   }
 
   function formatDateTime(dt) {
@@ -683,7 +856,6 @@
   }
 
   function getShiftTimes(dateStr, shiftValue) {
-    // return { start: Date|null, end: Date|null }
     if (!dateStr || !shiftValue || shiftValue === "cover") {
       return { start: null, end: null };
     }
@@ -696,17 +868,15 @@
     } else if (shiftValue === "17-1") {
       start = new Date(year, month - 1, day, 17, 0, 0);
       end = new Date(year, month - 1, day, 1, 0, 0);
-      end.setDate(end.getDate() + 1); // 1 am next day
+      end.setDate(end.getDate() + 1);
     } else if (shiftValue === "1-9") {
       start = new Date(year, month - 1, day, 1, 0, 0);
       end = new Date(year, month - 1, day, 9, 0, 0);
     }
-
     return { start, end };
   }
 
   function setStatusElement(el, diffMinutes, typeLabel, invertColors = false) {
-    // typeLabel: 'in' or 'out' (not used in text, but kept if needed)
     if (!el) return;
 
     el.style.display = "inline-flex";
@@ -719,12 +889,10 @@
     }
 
     if (diffMinutes > 2) {
-      // late
-      const cls = invertColors ? "early" : "late"; // invert for checkout
+      const cls = invertColors ? "early" : "late";
       el.classList.add(cls);
       textSpan.textContent = `Late by ${Math.round(diffMinutes)} min`;
     } else if (diffMinutes < -2) {
-      // early
       const cls = invertColors ? "late" : "early";
       el.classList.add(cls);
       textSpan.textContent = `Early by ${Math.abs(Math.round(diffMinutes))} min`;
@@ -734,72 +902,53 @@
     }
   }
 
-  function updateCoverDetailsVisibility() {
-    if (shiftSelect.value === "cover") {
-      coverDetails.style.display = "block";
-    } else {
-      coverDetails.style.display = "none";
-    }
-  }
-
   function updateTotalClients() {
     const rows = bookingsBody.querySelectorAll("tr");
     totalClientsSpan.textContent = rows.length.toString();
   }
 
-  function createBookingRow(initial = {}) {
+  function createBookingRow() {
     const row = document.createElement("tr");
 
     const indexCell = document.createElement("td");
     indexCell.textContent = (bookingsBody.children.length + 1).toString();
     row.appendChild(indexCell);
 
-    // Name
     const nameCell = document.createElement("td");
     const nameInput = document.createElement("input");
     nameInput.type = "text";
     nameInput.placeholder = "Client name";
-    nameInput.value = initial.name || "";
     nameCell.appendChild(nameInput);
     row.appendChild(nameCell);
 
-    // Phone
     const phoneCell = document.createElement("td");
     const phoneInput = document.createElement("input");
     phoneInput.type = "tel";
     phoneInput.placeholder = "Phone";
-    phoneInput.value = initial.phone || "";
     phoneCell.appendChild(phoneInput);
     row.appendChild(phoneCell);
 
-    // Session Number
     const sessionNoCell = document.createElement("td");
     const sessionNoInput = document.createElement("input");
     sessionNoInput.type = "number";
     sessionNoInput.min = "1";
     sessionNoInput.placeholder = "No.";
-    sessionNoInput.value = initial.sessionNumber || "";
     sessionNoCell.appendChild(sessionNoInput);
     row.appendChild(sessionNoCell);
 
-    // Session Date
     const sessionDateCell = document.createElement("td");
     const sessionDateInput = document.createElement("input");
     sessionDateInput.type = "date";
-    sessionDateInput.value = initial.sessionDate || "";
     sessionDateCell.appendChild(sessionDateInput);
     row.appendChild(sessionDateCell);
 
-    // Service
     const serviceCell = document.createElement("td");
     const serviceInput = document.createElement("input");
     serviceInput.type = "text";
     serviceInput.placeholder = "Service";
-    serviceInput.value = initial.service || "";
     serviceCell.appendChild(serviceInput);
     row.appendChild(serviceCell);
 
-    // Platform
     const platformCell = document.createElement("td");
     const platformSelect = document.createElement("select");
     ["", "facebook", "Instagram", "whatsapp", "phone call"].forEach((val) => {
@@ -808,11 +957,9 @@
       opt.textContent = val === "" ? "Select" : val;
       platformSelect.appendChild(opt);
     });
-    if (initial.platform) platformSelect.value = initial.platform;
     platformCell.appendChild(platformSelect);
     row.appendChild(platformCell);
 
-    // Branch
     const branchCell = document.createElement("td");
     const branchSelect = document.createElement("select");
     ["", "You Clinic", "Scar Clinic"].forEach((val) => {
@@ -821,19 +968,15 @@
       opt.textContent = val === "" ? "Select" : val;
       branchSelect.appendChild(opt);
     });
-    if (initial.branch) branchSelect.value = initial.branch;
     branchCell.appendChild(branchSelect);
     row.appendChild(branchCell);
 
-    // Marked
     const markedCell = document.createElement("td");
     const markedCheckbox = document.createElement("input");
     markedCheckbox.type = "checkbox";
-    markedCheckbox.checked = initial.marked === "Yes";
     markedCell.appendChild(markedCheckbox);
     row.appendChild(markedCell);
 
-    // Actions
     const actionsCell = document.createElement("td");
     const deleteBtn = document.createElement("button");
     deleteBtn.type = "button";
@@ -841,12 +984,11 @@
     deleteBtn.textContent = "Delete";
     deleteBtn.addEventListener("click", () => {
       row.remove();
-      // re-index rows
       Array.from(bookingsBody.children).forEach((tr, idx) => {
         tr.firstChild.textContent = (idx + 1).toString();
       });
       updateTotalClients();
-      saveState();
+      saveSessionToLocalStorage();
     });
     actionsCell.appendChild(deleteBtn);
     row.appendChild(actionsCell);
@@ -864,13 +1006,13 @@
 
       data.push({
         index: idx + 1,
-        name: getInput(1).value.trim(),
-        phone: getInput(2).value.trim(),
-        sessionNumber: getInput(3).value.trim(),
-        sessionDate: getInput(4).value || "",
-        service: getInput(5).value.trim(),
-        platform: getInput(6).value,
-        branch: getInput(7).value,
+        name: getInput(1)?.value.trim() || "",
+        phone: getInput(2)?.value.trim() || "",
+        sessionNumber: getInput(3)?.value.trim() || "",
+        sessionDate: getInput(4)?.value || "",
+        service: getInput(5)?.value.trim() || "",
+        platform: getInput(6)?.value || "",
+        branch: getInput(7)?.value || "",
         marked: tds[8].querySelector("input[type='checkbox']").checked ? "Yes" : "No",
       });
     });
@@ -890,111 +1032,161 @@
     return { total, scar, you };
   }
 
-  function saveState() {
+  async function saveReportToFirestore(payload) {
     try {
-      const state = {
-        reportDate: reportDateInput.value || "",
-        moderator: moderatorSelect.value || "",
-        shift: shiftSelect.value || "",
-        coverFor: coverForInput.value || "",
-        coverShift: coverShiftInput.value || "",
-        checkInTime: checkInTime ? checkInTime.toISOString() : null,
-        checkOutTime: checkOutTime ? checkOutTime.toISOString() : null,
-        bookings: collectBookingsData(),
-        activeStep: getActiveStep(),
-      };
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    } catch (e) {
-      console.error("Failed to save state", e);
+      syncStatusText.textContent = "Syncing with database…";
+      await addDoc(collection(db, "reports"), payload);
+      syncStatusText.textContent = "Synced ✔";
+      return true;
+    } catch (err) {
+      console.error("Error saving report:", err);
+      syncStatusText.textContent = "Saved locally – DB error";
+      alert("PDF generated but could not sync to database: " + (err.message || err));
+      return false;
     }
   }
 
-  function loadState() {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return;
-    try {
-      const state = JSON.parse(raw);
-      if (state.reportDate) reportDateInput.value = state.reportDate;
-      if (state.moderator) moderatorSelect.value = state.moderator;
-      if (state.shift) shiftSelect.value = state.shift;
-      updateCoverDetailsVisibility();
-      if (state.coverFor) coverForInput.value = state.coverFor;
-      if (state.coverShift) coverShiftInput.value = state.coverShift;
+  function generatePDF(payload) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
 
-      // Bookings
-      bookingsBody.innerHTML = "";
-      if (Array.isArray(state.bookings)) {
-        state.bookings.forEach((b) => createBookingRow(b));
-      }
+    const {
+      moderator,
+      date,
+      shiftLabel,
+      cover,
+      checkIn,
+      checkOut,
+      totals,
+      bookings
+    } = payload;
 
-      // Check In
-      if (state.checkInTime) {
-        checkInTime = new Date(state.checkInTime);
-        checkInDisplay.textContent = "Checked in at: " + formatDateTime(checkInTime);
-        const { start } = getShiftTimes(reportDateInput.value, shiftSelect.value);
-        if (!start || shiftSelect.value === "cover") {
-          checkInStatus.style.display = "inline-flex";
-          checkInStatus.classList.remove("early", "late", "ontime");
-          checkInStatus.classList.add("ontime");
-          checkInStatus.querySelector(".text").textContent = "No reference shift (cover).";
-        } else {
-          const diffMinutes = (checkInTime - start) / (1000 * 60);
-          setStatusElement(checkInStatus, diffMinutes, "in", false);
-        }
-      }
+    let y = 14;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Moderators Daily Report – Scar Group", 14, y);
+    y += 8;
 
-      // Check Out
-      if (state.checkOutTime) {
-        checkOutTime = new Date(state.checkOutTime);
-        checkOutDisplay.textContent = "Checked out at: " + formatDateTime(checkOutTime);
-        const { end } = getShiftTimes(reportDateInput.value, shiftSelect.value);
-        if (!end || shiftSelect.value === "cover") {
-          checkOutStatus.style.display = "inline-flex";
-          checkOutStatus.classList.remove("early", "late", "ontime");
-          checkOutStatus.classList.add("ontime");
-          checkOutStatus.querySelector(".text").textContent = "No reference shift (cover).";
-        } else {
-          const diffMinutes = (checkOutTime - end) / (1000 * 60);
-          // invertColors = true for checkout
-          setStatusElement(checkOutStatus, diffMinutes, "out", true);
-        }
-      }
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Moderator: ${moderator || "-"}`, 14, y); y += 6;
+    doc.text(`Date: ${date || "-"}`, 14, y); y += 6;
+    doc.text(`Shift: ${shiftLabel || "-"}`, 14, y); y += 6;
 
-      // Active step
-      const step = Number(state.activeStep) || 1;
-      setActiveSection(step);
-    } catch (e) {
-      console.error("Failed to load state", e);
+    if (cover) {
+      doc.text(`Covering for: ${cover.coverFor || "-"}`, 14, y); y += 6;
+      doc.text(`Covered shift: ${cover.coverShiftLabel || "-"}`, 14, y); y += 6;
     }
+
+    doc.text(`Check In: ${checkIn.formatted || "-"}`, 14, y); y += 6;
+    if (checkIn.diffMinutes != null) {
+      const d = checkIn.diffMinutes;
+      const inText =
+        d > 2 ? `Late by ${Math.round(d)} min`
+        : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
+        : "On time";
+      doc.text(`Check In status: ${inText}`, 14, y); y += 6;
+    }
+
+    doc.text(`Check Out: ${checkOut.formatted || "-"}`, 14, y); y += 6;
+    if (checkOut.diffMinutes != null) {
+      const d = checkOut.diffMinutes;
+      const outText =
+        d > 2 ? `Late by ${Math.round(d)} min`
+        : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
+        : "On time";
+      doc.text(`Check Out status: ${outText}`, 14, y); y += 8;
+    } else {
+      y += 4;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Clients Summary", 14, y); y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total clients: ${totals.total}`, 14, y); y += 5;
+    doc.text(`Scar Clinic clients: ${totals.scar}`, 14, y); y += 5;
+    doc.text(`You Clinic clients: ${totals.you}`, 14, y); y += 6;
+
+    const tableBody = bookings.map((b) => [
+      b.index.toString(),
+      b.name,
+      b.phone,
+      b.sessionNumber,
+      b.sessionDate,
+      b.service,
+      b.platform,
+      b.branch,
+      b.marked,
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"]],
+      body: tableBody,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [56, 189, 248] },
+    });
+
+    const fileName = `${moderator || "Moderator"}-${date || "report"}-ScarGroup.pdf`;
+    doc.save(fileName);
   }
 
-  // --- Event wiring ---
+  function clearAllFields() {
+    clearSessionFromLocalStorage();
+
+    reportDateInput.value = "";
+    moderatorSelect.value = "";
+    shiftSelect.value = "";
+    coverForInput.value = "";
+    coverShiftInput.value = "";
+    coverDetails.style.display = "none";
+    bookingsBody.innerHTML = "";
+    updateTotalClients();
+    checkInTime = null;
+    checkOutTime = null;
+    checkInDisplay.textContent = "Not checked in yet.";
+    checkOutDisplay.textContent = "Not checked out yet.";
+    checkInStatus.style.display = "none";
+    checkOutStatus.style.display = "none";
+    syncStatusText.textContent = "Ready";
+
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = pad2(today.getMonth() + 1);
+    const dd = pad2(today.getDate());
+    reportDateInput.value = `${yyyy}-${mm}-${dd}`;
+
+    setActiveSection(1);
+  }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // Default date -> today (only if nothing saved)
-    if (!localStorage.getItem(STORAGE_KEY)) {
-      const today = new Date();
-      const yyyy = today.getFullYear();
-      const mm = pad2(today.getMonth() + 1);
-      const dd = pad2(today.getDate());
+    const today = new Date();
+    const yyyy = today.getFullYear();
+    const mm = pad2(today.getMonth() + 1);
+    const dd = pad2(today.getDate());
+    if (!reportDateInput.value) {
       reportDateInput.value = `${yyyy}-${mm}-${dd}`;
     }
 
-    // Shift change -> show/hide cover details
     shiftSelect.addEventListener("change", () => {
-      updateCoverDetailsVisibility();
-      saveState();
+      if (shiftSelect.value === "cover") {
+        coverDetails.style.display = "block";
+      } else {
+        coverDetails.style.display = "none";
+        coverForInput.value = "";
+        coverShiftInput.value = "";
+      }
+      saveSessionToLocalStorage();
     });
 
-    // Cover selectors save
-    coverForInput.addEventListener("change", saveState);
-    coverShiftInput.addEventListener("change", saveState);
+    reportDateInput.addEventListener("change", saveSessionToLocalStorage);
+    moderatorSelect.addEventListener("change", saveSessionToLocalStorage);
+    coverForInput.addEventListener("change", saveSessionToLocalStorage);
+    coverShiftInput.addEventListener("change", saveSessionToLocalStorage);
 
-    // Header field changes
-    reportDateInput.addEventListener("change", saveState);
-    moderatorSelect.addEventListener("change", saveState);
+    bookingsBody.addEventListener("input", saveSessionToLocalStorage);
+    bookingsBody.addEventListener("change", saveSessionToLocalStorage);
 
-    // Check in button
     checkInBtn.addEventListener("click", () => {
       const dateStr = reportDateInput.value;
       const shiftValue = shiftSelect.value;
@@ -1013,10 +1205,9 @@
         const diffMinutes = (now - start) / (1000 * 60);
         setStatusElement(checkInStatus, diffMinutes, "in", false);
       }
-      saveState();
+      saveSessionToLocalStorage();
     });
 
-    // Check out button
     checkOutBtn.addEventListener("click", () => {
       const dateStr = reportDateInput.value;
       const shiftValue = shiftSelect.value;
@@ -1033,13 +1224,11 @@
         checkOutStatus.querySelector(".text").textContent = "No reference shift (cover).";
       } else {
         const diffMinutes = (now - end) / (1000 * 60);
-        // invertColors = true so early is red, late is green
         setStatusElement(checkOutStatus, diffMinutes, "out", true);
       }
-      saveState();
+      saveSessionToLocalStorage();
     });
 
-    // Navigation
     nextTo2Btn.addEventListener("click", () => {
       if (!reportDateInput.value) {
         alert("Please select the report date.");
@@ -1055,7 +1244,7 @@
       }
       if (shiftSelect.value === "cover") {
         if (!coverForInput.value) {
-          alert("Please select who you're covering for.");
+          alert("Please select who you are covering for.");
           return;
         }
         if (!coverShiftInput.value) {
@@ -1068,47 +1257,27 @@
         return;
       }
       setActiveSection(2);
-      saveState();
     });
 
-    backTo1Btn.addEventListener("click", () => {
-      setActiveSection(1);
-      saveState();
-    });
+    backTo1Btn.addEventListener("click", () => setActiveSection(1));
+    nextTo3Btn.addEventListener("click", () => setActiveSection(3));
+    backTo2Btn.addEventListener("click", () => setActiveSection(2));
 
-    nextTo3Btn.addEventListener("click", () => {
-      setActiveSection(3);
-      saveState();
-    });
-
-    backTo2Btn.addEventListener("click", () => {
-      setActiveSection(2);
-      saveState();
-    });
-
-    // Add client
     addClientBtn.addEventListener("click", () => {
       createBookingRow();
-      saveState();
+      saveSessionToLocalStorage();
     });
 
-    // Any change in bookings table -> save state
-    bookingsBody.addEventListener("input", saveState);
-    bookingsBody.addEventListener("change", saveState);
-
-    // New Session button -> clear storage & reset
     newSessionBtn.addEventListener("click", () => {
-      const ok = confirm("Start a new session? This will clear all current data.");
-      if (!ok) return;
-      localStorage.removeItem(STORAGE_KEY);
-      location.reload();
+      if (confirm("Start a new session? This will clear all current data.")) {
+        clearAllFields();
+      }
     });
 
-    // Send data -> generate PDF
-    sendDataBtn.addEventListener("click", () => {
+    sendDataBtn.addEventListener("click", async () => {
       if (!checkOutTime) {
-        const proceed = confirm("You didn't click Check Out yet. Generate PDF anyway?");
-        if (!proceed) return;
+        alert("Please click Check Out before sending data.");
+        return;
       }
 
       const dateStr = reportDateInput.value;
@@ -1130,114 +1299,55 @@
         checkOutDiff = (checkOutTime - end) / (1000 * 60);
       }
 
-      // Build PDF
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-
-      let y = 14;
-      doc.setFontSize(16);
-      doc.setFont("helvetica", "bold");
-      doc.text("Moderators Daily Report", 14, y);
-      y += 8;
-
-      doc.setFontSize(11);
-      doc.setFont("helvetica", "normal");
-      doc.text(`Moderator: ${moderator || "-"}`, 14, y);
-      y += 6;
-      doc.text(`Date: ${dateStr || "-"}`, 14, y);
-      y += 6;
-
       let shiftLabel = "";
       if (shiftValue === "9-17") shiftLabel = "9 am : 5 pm";
       else if (shiftValue === "17-1") shiftLabel = "5 pm : 1 am";
       else if (shiftValue === "1-9") shiftLabel = "1 am : 9 am";
       else if (shiftValue === "cover") shiftLabel = "Cover";
 
-      doc.text(`Shift: ${shiftLabel || "-"}`, 14, y);
-      y += 6;
-
+      let cover = null;
       if (shiftValue === "cover") {
-        doc.text(`Covering for: ${coverForInput.value || "-"}`, 14, y);
-        y += 6;
-        const cs = coverShiftInput.value;
+        const cv = coverShiftInput.value;
         let csLabel = "";
-        if (cs === "9-17") csLabel = "9 am : 5 pm";
-        else if (cs === "17-1") csLabel = "5 pm : 1 am";
-        else if (cs === "1-9") csLabel = "1 am : 9 am";
-        doc.text(`Covered shift: ${csLabel || "-"}`, 14, y);
-        y += 6;
+        if (cv === "9-17") csLabel = "9 am : 5 pm";
+        else if (cv === "17-1") csLabel = "5 pm : 1 am";
+        else if (cv === "1-9") csLabel = "1 am : 9 am";
+        cover = {
+          coverFor: coverForInput.value || "",
+          coverShift: cv || "",
+          coverShiftLabel: csLabel || cv || ""
+        };
       }
 
-      doc.text(`Check In: ${checkInTime ? formatDateTime(checkInTime) : "-"}`, 14, y);
-      y += 6;
-      if (checkInDiff != null) {
-        const inText =
-          checkInDiff > 2
-            ? `Late by ${Math.round(checkInDiff)} min`
-            : checkInDiff < -2
-            ? `Early by ${Math.abs(Math.round(checkInDiff))} min`
-            : "On time";
-        doc.text(`Check In status: ${inText}`, 14, y);
-        y += 6;
-      }
+      const payload = {
+        clinic: "Scar Group",
+        date: dateStr,
+        moderator,
+        shiftValue,
+        shiftLabel,
+        cover,
+        checkIn: {
+          time: checkInTime ? checkInTime.toISOString() : null,
+          formatted: checkInTime ? formatDateTime(checkInTime) : "",
+          diffMinutes: checkInDiff
+        },
+        checkOut: {
+          time: checkOutTime ? checkOutTime.toISOString() : null,
+          formatted: checkOutTime ? formatDateTime(checkOutTime) : "",
+          diffMinutes: checkOutDiff
+        },
+        totals,
+        bookings,
+        createdAt: serverTimestamp()
+      };
 
-      doc.text(`Check Out: ${checkOutTime ? formatDateTime(checkOutTime) : "-"}`, 14, y);
-      y += 6;
-      if (checkOutDiff != null) {
-        const outText =
-          checkOutDiff > 2
-            ? `Late by ${Math.round(checkOutDiff)} min`
-            : checkOutDiff < -2
-            ? `Early by ${Math.abs(Math.round(checkOutDiff))} min`
-            : "On time";
-        doc.text(`Check Out status: ${outText}`, 14, y);
-        y += 8;
-      } else {
-        y += 4;
-      }
-
-      // Totals summary before table
-      doc.setFont("helvetica", "bold");
-      doc.text("Clients Summary", 14, y);
-      y += 6;
-      doc.setFont("helvetica", "normal");
-      doc.text(`Total clients: ${totals.total}`, 14, y);
-      y += 5;
-      doc.text(`Scar Clinic clients: ${totals.scar}`, 14, y);
-      y += 5;
-      doc.text(`You Clinic clients: ${totals.you}`, 14, y);
-      y += 6;
-
-      // Bookings table
-      const tableBody = bookings.map((b) => [
-        b.index.toString(),
-        b.name,
-        b.phone,
-        b.sessionNumber,
-        b.sessionDate,
-        b.service,
-        b.platform,
-        b.branch,
-        b.marked,
-      ]);
-
-      doc.autoTable({
-        startY: y,
-        head: [
-          ["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"],
-        ],
-        body: tableBody,
-        styles: { fontSize: 8 },
-        headStyles: { fillColor: [31, 111, 235] },
-      });
-
-      const fileName = `${moderator || "Moderator"}-${dateStr || "report"}.pdf`;
-      doc.save(fileName);
-      // مفيش reset بعد الداونلود – الجلسة تفضل زي ما هي
+      await saveReportToFirestore(payload);
+      generatePDF(payload);
+      saveSessionToLocalStorage();
     });
 
-    // أخيراً: حمل أي state محفوظ
-    loadState();
+    // فى الآخر: حمّل الـ session اللى فى localStorage (هترجعك لنفس الـ step)
+    loadSessionFromLocalStorage();
   });
 </script>
 </body>
