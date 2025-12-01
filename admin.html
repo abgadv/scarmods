@@ -8,6 +8,8 @@
   <!-- jsPDF + AutoTable -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+  <!-- SheetJS for Excel export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
   <style>
     :root {
@@ -15,13 +17,16 @@
       --card-bg: #020617;
       --primary: #38bdf8;
       --primary-soft: rgba(56, 189, 248, 0.12);
-      --primary-dark: #0ea5e9;
-      --border: #1f2933;
+      --primary-strong: rgba(56, 189, 248, 0.25);
+      --accent: #22c55e;
+      --danger: #f97373;
+      --danger-soft: rgba(248, 113, 113, 0.12);
       --text-main: #e5e7eb;
       --text-muted: #9ca3af;
-      --danger: #f97373;
-      --success: #4ade80;
-      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.7);
+      --border: #1f2937;
+      --shadow-soft: 0 18px 45px rgba(15, 23, 42, 0.9);
+      --shadow-sm: 0 10px 25px rgba(15, 23, 42, 0.7);
+      --scrollbar: #4b5563;
     }
 
     * {
@@ -40,37 +45,69 @@
       align-items: flex-start;
     }
 
-    .app-shell {
+    .shell {
       width: 100%;
       max-width: 1100px;
-      margin: 20px 12px;
+      padding: 24px 16px 32px;
     }
 
     .card {
-      background: radial-gradient(circle at top left, #020617, #020617 50%);
-      border-radius: 24px;
+      background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 55%),
+                  radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 50%),
+                  #020617;
+      border-radius: 22px;
+      padding: 20px 18px 22px;
       box-shadow: var(--shadow-soft);
-      padding: 22px 20px;
-      border: 1px solid rgba(148, 163, 184, 0.2);
+      border: 1px solid rgba(15, 23, 42, 0.85);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .card::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(56,189,248,0.07), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(34,197,94,0.05), transparent 55%);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    .card-inner {
+      position: relative;
+      z-index: 1;
     }
 
     .header {
       display: flex;
+      align-items: center;
       justify-content: space-between;
-      align-items: flex-start;
-      flex-wrap: wrap;
-      gap: 10px;
       margin-bottom: 18px;
+      gap: 12px;
     }
 
-    .title-block h1 {
+    .header-title {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .header-title h1 {
+      font-size: 20px;
       margin: 0;
-      font-size: 1.7rem;
-      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
 
-    .title-block span {
-      font-size: 0.85rem;
+    .header-title h1 span {
+      font-size: 22px;
+    }
+
+    .header-title p {
+      margin: 0;
+      font-size: 13px;
       color: var(--text-muted);
     }
 
@@ -78,11 +115,11 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 4px 10px;
+      padding: 6px 10px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid #10b98155;
-      font-size: 0.8rem;
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      font-size: 11px;
       color: var(--text-muted);
     }
 
@@ -90,35 +127,40 @@
       width: 8px;
       height: 8px;
       border-radius: 999px;
-      background: var(--success);
-    }
-
-    .status-pill.error {
-      border-color: rgba(248, 113, 113, 0.7);
-    }
-
-    .status-pill.error .status-dot {
       background: var(--danger);
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.7);
     }
 
-    .filters-row {
+    .status-pill.ok .status-dot {
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+    }
+
+    .status-pill span {
+      color: var(--text-main);
+    }
+
+    .filters {
+      margin-bottom: 14px;
+      border-radius: 16px;
+      padding: 14px 12px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,0.95) 40%, #020617 100%);
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .filters-grid {
       display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
+      grid-template-columns: repeat(5, minmax(0, 1fr)) auto;
       gap: 10px;
-      margin-bottom: 12px;
+      align-items: end;
     }
 
-    @media (max-width: 760px) {
-      .filters-row {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
-    }
-
-    label {
+    .filter-group label {
       display: block;
-      font-size: 0.8rem;
-      margin-bottom: 2px;
+      font-size: 11px;
       color: var(--text-muted);
+      margin-bottom: 4px;
     }
 
     select,
@@ -126,30 +168,42 @@
     input[type="text"],
     input[type="password"] {
       width: 100%;
-      padding: 7px 10px;
+      padding: 8px 9px;
       border-radius: 10px;
-      border: 1px solid var(--border);
-      background: #020617;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.98);
       color: var(--text-main);
-      font-size: 0.85rem;
+      font-size: 13px;
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
     }
 
     select:focus,
     input[type="date"]:focus,
     input[type="text"]:focus,
     input[type="password"]:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+      border-color: rgba(56, 189, 248, 0.9);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.35);
+      background: rgba(15, 23, 42, 1);
+    }
+
+    select {
+      padding-right: 26px;
+    }
+
+    .filters-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
     }
 
     .btn {
       border: none;
       border-radius: 999px;
-      padding: 8px 16px;
-      font-size: 0.85rem;
-      font-weight: 600;
+      padding: 7px 13px;
+      font-size: 12px;
+      font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
@@ -184,228 +238,507 @@
 
     .btn-small {
       padding: 6px 12px;
-      font-size: 0.78rem;
-    }
-
-    .filters-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-
-    .table-wrapper {
-      border-radius: 16px;
-      border: 1px solid var(--border);
-      background: radial-gradient(circle at top left, #020617, #020617 55%);
-      padding: 10px;
-      overflow-x: auto;
-    }
-
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.8rem;
-      min-width: 760px;
-      color: var(--text-main);
-    }
-
-    th,
-    td {
-      padding: 7px 8px;
-      text-align: left;
-      border-bottom: 1px solid #111827;
-    }
-
-    thead {
-      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.75));
-    }
-
-    th {
-      font-weight: 600;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-
-    tbody tr:hover {
-      background: rgba(15, 23, 42, 0.7);
-    }
-
-    .table-footer {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 10px;
-      gap: 10px;
-      flex-wrap: wrap;
-      font-size: 0.85rem;
-      color: var(--text-muted);
+      font-size: 11px;
     }
 
     .badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      padding: 3px 8px;
+      padding: 5px 9px 5px 7px;
       border-radius: 999px;
-      background: rgba(15, 23, 42, 0.9);
-      border: 1px solid rgba(148, 163, 184, 0.4);
-      font-size: 0.78rem;
+      background: rgba(15, 23, 42, 0.95);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      font-size: 11px;
+      color: var(--text-muted);
     }
 
     .badge strong {
-      font-weight: 700;
-      color: var(--primary);
+      color: var(--text-main);
+      font-weight: 600;
     }
 
-    .error-message {
-      margin-top: 12px;
-      font-size: 0.8rem;
-      color: var(--danger);
+    .badge-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
     }
 
-    @media (max-width: 640px) {
-      .card {
-        padding: 18px 14px;
+    .badge-dot.blue {
+      background: rgba(56, 189, 248, 0.9);
+      box-shadow: 0 0 10px rgba(56, 189, 248, 0.9);
+    }
+
+    .badge-dot.green {
+      background: rgba(34, 197, 94, 0.9);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.9);
+    }
+
+    .badge-dot.purple {
+      background: rgba(168, 85, 247, 0.9);
+      box-shadow: 0 0 10px rgba(168, 85, 247, 0.9);
+    }
+
+    .badge-dot.red {
+      background: rgba(248, 113, 113, 0.9);
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.9);
+    }
+
+    .table-wrapper {
+      border-radius: 16px;
+      background: radial-gradient(circle at top, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.98) 40%, #020617 100%);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+    }
+
+    thead {
+      background: linear-gradient(90deg, rgba(15,23,42,0.98), rgba(15,23,42,1));
+    }
+
+    thead th {
+      padding: 10px 9px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      white-space: nowrap;
+    }
+
+    tbody tr:nth-child(even) {
+      background: rgba(15, 23, 42, 0.9);
+    }
+
+    tbody tr:nth-child(odd) {
+      background: rgba(15, 23, 42, 0.97);
+    }
+
+    tbody td {
+      padding: 8px 9px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      color: var(--text-main);
+    }
+
+    tbody tr:hover {
+      background: rgba(15, 23, 42, 1);
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 11px;
+      border-top: 1px solid rgba(31, 41, 55, 0.9);
+      background: rgba(15, 23, 42, 0.98);
+    }
+
+    .actions-cell {
+      display: flex;
+      gap: 6px;
+    }
+
+    .btn-icon {
+      width: 26px;
+      height: 26px;
+      border-radius: 999px;
+      border: 1px solid rgba(55, 65, 81, 0.8);
+      background: rgba(15, 23, 42, 0.95);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-muted);
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .btn-icon:hover {
+      background: rgba(31, 41, 55, 1);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 10px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      background: rgba(15, 23, 42, 0.96);
+    }
+
+    .pill-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 999px;
+    }
+
+    .pill-dot.green {
+      background: rgba(34, 197, 94, 0.9);
+    }
+
+    .pill-dot.yellow {
+      background: rgba(234, 179, 8, 0.9);
+    }
+
+    .pill-dot.red {
+      background: rgba(248, 113, 113, 0.9);
+    }
+
+    .error-box {
+      display: none;
+      margin-top: 10px;
+      border-radius: 12px;
+      padding: 9px 10px;
+      font-size: 12px;
+      background: var(--danger-soft);
+      border: 1px solid rgba(248, 113, 113, 0.6);
+      color: #fecaca;
+    }
+
+    .error-box strong {
+      color: #fee2e2;
+    }
+
+    .login-shell {
+      max-width: 360px;
+      margin: 80px auto;
+    }
+
+    .login-card {
+      border-radius: 20px;
+      padding: 22px 18px 20px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.9), rgba(15,23,42,0.98) 40%, #020617 100%);
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .login-card h2 {
+      margin: 0 0 4px;
+      font-size: 18px;
+    }
+
+    .login-card p {
+      margin: 0 0 14px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .login-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .login-error {
+      display: none;
+      margin-bottom: 10px;
+      font-size: 11px;
+      color: #fecaca;
+      padding: 7px 9px;
+      border-radius: 10px;
+      background: var(--danger-soft);
+      border: 1px solid rgba(248, 113, 113, 0.6);
+    }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 6px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .connection span {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .connection small {
+      color: var(--text-muted);
+    }
+
+    .connection .dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--danger);
+      box-shadow: 0 0 10px rgba(248, 113, 113, 0.8);
+    }
+
+    .connection.ok .dot {
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(34, 197, 94, 0.95);
+    }
+
+    .connection.ok small {
+      color: #bbf7d0;
+    }
+
+    .footer {
+      margin-top: 18px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: 0.85;
+    }
+
+    @media (max-width: 900px) {
+      .filters-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      .connection {
+        justify-content: flex-start;
       }
 
       .filters-actions {
-        flex-direction: column-reverse;
-        align-items: stretch;
+        justify-content: flex-start;
+      }
+    }
+
+    @media (max-width: 640px) {
+      .filters-grid {
+        grid-template-columns: 1fr;
       }
 
       .btn-block-mobile {
         width: 100%;
+        justify-content: center;
       }
+
+      .table-footer {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+      }
+
+      thead th:nth-child(4),
+      thead th:nth-child(5),
+      thead th:nth-child(6),
+      thead th:nth-child(7) {
+        display: none;
+      }
+
+      tbody td:nth-child(4),
+      tbody td:nth-child(5),
+      tbody td:nth-child(6),
+      tbody td:nth-child(7) {
+        display: none;
+      }
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: #020617;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--scrollbar);
+      border-radius: 999px;
     }
   </style>
 </head>
 <body>
+<div class="shell">
 
-<!-- Login Shell -->
-<div class="app-shell" id="loginShell">
-  <div class="card">
-    <div class="header">
-      <div class="title-block">
-        <h1>Admin Login</h1>
-        <span>Access moderators dashboard</span>
+  <!-- Login Shell -->
+  <div id="loginShell" class="login-shell">
+    <div class="login-card">
+      <h2>Moderators Dashboard – Scar Group</h2>
+      <p>Sign in with your moderator credentials to view and export daily reports.</p>
+
+      <form id="loginForm">
+        <div class="login-grid">
+          <div class="filter-group">
+            <label for="loginUsername">Username</label>
+            <input id="loginUsername" type="text" autocomplete="username" />
+          </div>
+          <div class="filter-group">
+            <label for="loginPassword">Password</label>
+            <input id="loginPassword" type="password" autocomplete="current-password" />
+          </div>
+        </div>
+
+        <div id="loginError" class="login-error">
+          Invalid username or password. Please try again.
+        </div>
+
+        <button type="submit" class="btn btn-primary btn-block-mobile">
+          Sign in
+        </button>
+      </form>
+
+      <div class="connection" id="connectionStatus">
+        <span>
+          <span class="dot"></span>
+          <small id="connectionText">Not connected</small>
+        </span>
       </div>
     </div>
-    <form id="loginForm">
-      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;">
-        <div>
-          <label for="loginUsername">Username</label>
-          <input type="text" id="loginUsername" autocomplete="username" />
-        </div>
-        <div>
-          <label for="loginPassword">Password</label>
-          <input type="password" id="loginPassword" autocomplete="current-password" />
-        </div>
-      </div>
-      <button type="submit" class="btn btn-primary btn-block-mobile">Login</button>
-      <div id="loginError" class="error-message" style="display:none;">Invalid username or password.</div>
-    </form>
   </div>
-</div>
 
-<!-- Dashboard Shell -->
-<div class="app-shell" id="dashboardShell" style="display:none;">
-  <div class="card">
-    <div class="header">
-      <div class="title-block">
-        <h1>Moderators Dashboard – Scar Group</h1>
-        <span>Filter reports by moderator & date, download PDFs any time.</span>
-      </div>
-      <div id="connectionStatus" class="status-pill">
-        <span class="status-dot"></span>
-        <span id="connectionText">Connecting…</span>
-      </div>
-    </div>
+  <!-- Dashboard Shell -->
+  <div id="dashboardShell" style="display:none;">
+    <div class="card">
+      <div class="card-inner">
 
-    <!-- Filters -->
-    <div class="filters-row">
-      <div>
-        <label for="filterModerator">Moderator</label>
-        <select id="filterModerator">
-          <option value="All">All</option>
-          <option>Shahd</option>
-          <option>Manar</option>
-          <option>Treeza</option>
-          <option>Engy</option>
-          <option>Monica</option>
-          <option>Zeinab</option>
-          <option>Samah</option>
-        </select>
-      </div>
-      <div>
-        <label for="fromDate">From date</label>
-        <input type="date" id="fromDate" />
-      </div>
-      <div>
-        <label for="toDate">To date</label>
-        <input type="date" id="toDate" />
-      </div>
-      <div>
-        <label>&nbsp;</label>
-        <div class="filters-actions">
-          <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small btn-block-mobile">
-            Reset
+        <div class="header">
+          <div class="header-title">
+            <h1>
+              <span>📊</span> Moderators Daily Reports
+            </h1>
+            <p>Review and export moderators daily performance with live data from Firestore.</p>
+          </div>
+
+          <div class="status-pill" id="statusPill">
+            <span class="status-dot"></span>
+            <span>Loading...</span>
+          </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters">
+          <div class="filters-grid">
+            <div class="filter-group">
+              <label for="filterModerator">Moderator</label>
+              <select id="filterModerator">
+                <option value="All">All</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="filterNew">New client?</label>
+              <select id="filterNew">
+                <option value="All">All</option>
+                <option value="New">New only</option>
+                <option value="NotNew">Not New</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="dateMode">Date filter by</label>
+              <select id="dateMode">
+                <option value="report">Report date</option>
+                <option value="session">Session date</option>
+              </select>
+            </div>
+
+            <div class="filter-group">
+              <label for="fromDate">From date</label>
+              <input type="date" id="fromDate" />
+            </div>
+
+            <div class="filter-group">
+              <label for="toDate">To date</label>
+              <input type="date" id="toDate" />
+            </div>
+
+            <div class="filter-group">
+              <label>&nbsp;</label>
+              <div class="filters-actions">
+                <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small btn-block-mobile">
+                  Reset
+                </button>
+                <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small btn-block-mobile">
+                  Apply
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div style="margin-top:4px; margin-bottom:8px;">
+          <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
+            📥 Download performance PDF (current filter)
           </button>
-          <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small btn-block-mobile">
-            Apply
+          <button type="button" id="downloadBookingsBtn" class="btn btn-secondary btn-block-mobile">
+            📊 Download bookings data
           </button>
         </div>
+
+        <!-- Table -->
+        <div class="table-wrapper">
+          <table>
+            <thead>
+            <tr>
+              <th>Date</th>
+              <th>Moderator</th>
+              <th>Shift</th>
+              <th>Total clients</th>
+              <th>Total new</th>
+              <th>Scar</th>
+              <th>You</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody id="reportsBody">
+            </tbody>
+          </table>
+        </div>
+
+        <div class="table-footer">
+          <div class="badge">
+            <span class="badge-dot blue"></span>
+            Reports loaded: <strong id="reportsCount">0</strong>
+          </div>
+          <div class="badge">
+            <span class="badge-dot green"></span>
+            Total clients in filter: <strong id="totalClientsFiltered">0</strong>
+          </div>
+        </div>
+
+        <div id="errorBox" class="error-box">
+          <strong>Connection error:</strong> Unable to load reports at the moment. Please refresh the page or check your connection.
+        </div>
+
       </div>
     </div>
-
-    <div style="margin-top:4px; margin-bottom:8px;">
-      <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
-        📥 Download performance PDF (current filter)
-      </button>
-    </div>
-
-    <!-- Table -->
-    <div class="table-wrapper">
-      <table>
-        <thead>
-        <tr>
-          <th>Date</th>
-          <th>Moderator</th>
-          <th>Shift</th>
-          <th>Total clients</th>
-          <th>Scar</th>
-          <th>You</th>
-          <th>Created</th>
-          <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody id="reportsBody">
-        </tbody>
-      </table>
-    </div>
-
-    <div class="table-footer">
-      <div class="badge">
-        Reports loaded: <strong id="reportsCount">0</strong>
-      </div>
-      <div class="badge">
-        Total clients (filtered): <strong id="totalClientsFiltered">0</strong>
-      </div>
-    </div>
-
-    <div id="errorBox" class="error-message" style="display:none;"></div>
   </div>
+
+  <!-- Global Footer -->
+  <footer class="footer">
+    © Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan
+  </footer>
 </div>
 
 <script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import {
+    initializeApp
+  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
   import {
     getFirestore,
     collection,
     getDocs,
-    query,
-    orderBy
+    deleteDoc,
+    doc,
+    updateDoc,
+    addDoc,
+    serverTimestamp,
+    orderBy,
+    query
   } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -423,13 +756,17 @@
 
   const connectionStatus = document.getElementById("connectionStatus");
   const connectionText = document.getElementById("connectionText");
+  const statusPill = document.getElementById("statusPill");
 
   const filterModerator = document.getElementById("filterModerator");
+  const filterNew = document.getElementById("filterNew");
+  const dateModeSelect = document.getElementById("dateMode");
   const fromDateInput = document.getElementById("fromDate");
   const toDateInput = document.getElementById("toDate");
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
   const applyFiltersBtn = document.getElementById("applyFiltersBtn");
   const downloadPerformanceBtn = document.getElementById("downloadPerformanceBtn");
+  const downloadBookingsBtn = document.getElementById("downloadBookingsBtn");
 
   const reportsBody = document.getElementById("reportsBody");
   const reportsCountSpan = document.getElementById("reportsCount");
@@ -448,7 +785,7 @@
     "islam": "gasd53ds4fs5dg34",
     "andrew": "5345asd54fffdg23",
     "baraa": "21354adfs54g1sf5",
-    "hakim": "fs54g53df4gh3d5s",
+    "hakim": "123",
     "admin": "fg2hd5435ads4as5",
     "engy": "asdfighy321df3as"
   };
@@ -457,21 +794,121 @@
   let filteredReports = [];
   let isDashboardInitialized = false;
 
+  const FOOTER_TEXT = "© Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan";
+
   function setConnectionStatus(ok, msg) {
     connectionStatus.classList.toggle("error", !ok);
+    connectionStatus.classList.toggle("ok", ok);
     connectionText.textContent = msg;
+    statusPill.classList.toggle("ok", ok);
+    statusPill.querySelector("span:nth-child(2)").textContent = ok ? "Connected to Firestore" : "Not connected";
+  }
+
+  function formatCreatedAt(ts) {
+    if (!ts) return "-";
+    try {
+      const date = ts.toDate ? ts.toDate() : new Date(ts.seconds * 1000);
+      return date.toLocaleString("en-GB", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+      });
+    } catch {
+      return "-";
+    }
+  }
+
+  // New client flag: يعتمد بس على القيم new / yes من الداتا بيز (مع شوية تسامح لو Boolean / رقم)
+  function bookingIsNew(b) {
+    if (!b) return false;
+    const raw = b.isNew ?? b.new ?? b.isNewClient ?? "";
+    if (typeof raw === "string") {
+      const v = raw.trim().toLowerCase();
+      return v === "new" || v === "yes";
+    }
+    if (typeof raw === "boolean") return raw;
+    if (typeof raw === "number") return raw === 1;
+    return false;
+  }
+
+  function reportMatchesDateFilter(report, dateMode, from, to) {
+    if (!from && !to) return true;
+
+    if (dateMode === "session") {
+      const bookings = Array.isArray(report.bookings) ? report.bookings : [];
+      if (!bookings.length) return false;
+      return bookings.some((b) => {
+        const sd = b.sessionDate || "";
+        if (!sd) return false;
+        if (from && sd < from) return false;
+        if (to && sd > to) return false;
+        return true;
+      });
+    } else {
+      const d = report.date || "";
+      if (!d) return false;
+      if (from && d < from) return false;
+      if (to && d > to) return false;
+      return true;
+    }
+  }
+
+  function computeReportTotals(report, dateMode, from, to) {
+    const allBookings = Array.isArray(report.bookings) ? report.bookings : [];
+    let bookings = allBookings;
+
+    if (dateMode === "session" && (from || to)) {
+      bookings = allBookings.filter((b) => {
+        const sd = b.sessionDate || "";
+        if (!sd) return false;
+        if (from && sd < from) return false;
+        if (to && sd > to) return false;
+        return true;
+      });
+    }
+
+    let total = 0;
+    let scar = 0;
+    let you = 0;
+    let totalNew = 0;
+
+    bookings.forEach((b) => {
+      total++;
+      if (bookingIsNew(b)) totalNew++;
+      const branchName = (b.branch || report.branch || report.clinic || "").toLowerCase();
+      if (branchName.includes("you")) {
+        you++;
+      } else {
+        scar++;
+      }
+    });
+
+    return { total, scar, you, totalNew };
   }
 
   function applyFilters() {
     errorBox.style.display = "none";
     const mod = filterModerator.value;
+    const newFilter = filterNew.value;
     const from = fromDateInput.value;
     const to = toDateInput.value;
+    const dateMode = dateModeSelect.value || "report";
 
     filteredReports = allReports.filter((r) => {
       if (mod !== "All" && r.moderator !== mod) return false;
-      if (from && r.date && r.date < from) return false;
-      if (to && r.date && r.date > to) return false;
+
+      if (!reportMatchesDateFilter(r, dateMode, from, to)) return false;
+
+      if (newFilter !== "All") {
+        const bookings = Array.isArray(r.bookings) ? r.bookings : [];
+        const hasNew = bookings.some((b) => bookingIsNew(b));
+
+        if (newFilter === "New" && !hasNew) return false;
+        if (newFilter === "NotNew" && hasNew) return false;
+      }
+
       return true;
     });
 
@@ -482,41 +919,75 @@
     reportsBody.innerHTML = "";
     let totalClients = 0;
 
-    filteredReports.forEach((r) => {
+    const from = fromDateInput.value;
+    const to = toDateInput.value;
+    const dateMode = dateModeSelect.value || "report";
+
+    filteredReports.forEach((report) => {
       const tr = document.createElement("tr");
 
-      const created = r.createdAt && r.createdAt.toDate
-        ? r.createdAt.toDate()
-        : null;
+      const dateTd = document.createElement("td");
+      dateTd.textContent = report.date || "-";
+      tr.appendChild(dateTd);
 
-      const createdStr = created
-        ? created.toLocaleString()
-        : "-";
+      const modTd = document.createElement("td");
+      modTd.textContent = report.moderator || "-";
+      tr.appendChild(modTd);
 
-      totalClients += (r.totals?.total || 0);
+      const shiftTd = document.createElement("td");
+      shiftTd.textContent = report.shiftLabel || report.shift || "-";
+      tr.appendChild(shiftTd);
 
-      tr.innerHTML = `
-        <td>${r.date || "-"}</td>
-        <td>${r.moderator || "-"}</td>
-        <td>${r.shiftLabel || "-"}</td>
-        <td>${r.totals?.total ?? 0}</td>
-        <td>${r.totals?.scar ?? 0}</td>
-        <td>${r.totals?.you ?? 0}</td>
-        <td>${createdStr}</td>
-        <td>
-          <button class="btn btn-secondary btn-small" data-id="${r.id}">Download PDF</button>
-        </td>
-      `;
+      const totalTd = document.createElement("td");
+      const totalNewTd = document.createElement("td");
+      const scarTd = document.createElement("td");
+      const youTd = document.createElement("td");
 
-      tr.querySelector("button").addEventListener("click", () => {
-        downloadSingleReportPDF(r);
-      });
+      const totals = computeReportTotals(report, dateMode, from, to);
+
+      totalTd.textContent = totals.total.toString();
+      totalNewTd.textContent = totals.totalNew.toString();
+      scarTd.textContent = totals.scar.toString();
+      youTd.textContent = totals.you.toString();
+      totalClients += totals.total;
+
+      tr.appendChild(totalTd);
+      tr.appendChild(totalNewTd);
+      tr.appendChild(scarTd);
+      tr.appendChild(youTd);
+
+      const createdTd = document.createElement("td");
+      createdTd.textContent = formatCreatedAt(report.createdAt);
+      tr.appendChild(createdTd);
+
+      const actionsTd = document.createElement("td");
+      actionsTd.className = "actions-cell";
+
+      const viewBtn = document.createElement("button");
+      viewBtn.className = "btn-icon";
+      viewBtn.title = "Download single report PDF";
+      viewBtn.textContent = "⬇";
+      viewBtn.addEventListener("click", () => downloadSingleReportPDF(report));
+      actionsTd.appendChild(viewBtn);
+
+      tr.appendChild(actionsTd);
 
       reportsBody.appendChild(tr);
     });
 
     reportsCountSpan.textContent = filteredReports.length.toString();
     totalClientsFilteredSpan.textContent = totalClients.toString();
+  }
+
+  function addFooterToAllPages(doc) {
+    const pageCount = doc.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      const pageHeight = doc.internal.pageSize.height || doc.internal.pageSize.getHeight();
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text(FOOTER_TEXT, 14, pageHeight - 8);
+    }
   }
 
   function downloadSingleReportPDF(report) {
@@ -575,11 +1046,16 @@
     doc.setFont("helvetica", "bold");
     doc.text("Clients Summary", 14, y); y += 6;
     doc.setFont("helvetica", "normal");
+
+    const bookingsArray = Array.isArray(bookings) ? bookings : [];
+    const totalNew = bookingsArray.reduce((acc, b) => acc + (bookingIsNew(b) ? 1 : 0), 0);
+
     doc.text(`Total clients: ${totals?.total ?? 0}`, 14, y); y += 5;
+    doc.text(`Total new: ${totalNew}`, 14, y); y += 5;
     doc.text(`Scar Clinic clients: ${totals?.scar ?? 0}`, 14, y); y += 5;
     doc.text(`You Clinic clients: ${totals?.you ?? 0}`, 14, y); y += 6;
 
-    const tableBody = bookings.map((b, idx) => [
+    const tableBody = bookingsArray.map((b, idx) => [
       (idx + 1).toString(),
       b.name || "",
       b.phone || "",
@@ -589,16 +1065,18 @@
       b.platform || "",
       b.branch || "",
       b.marked || "",
+      bookingIsNew(b) ? "New" : ""
     ]);
 
     doc.autoTable({
       startY: y,
-      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"]],
-
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked", "New?"]],
       body: tableBody,
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [56, 189, 248] },
+      headStyles: { fillColor: [56, 189, 248] }
     });
+
+    addFooterToAllPages(doc);
 
     const fileName = `${moderator || "Moderator"}-${date || "report"}-ScarGroup.pdf`;
     doc.save(fileName);
@@ -623,17 +1101,31 @@
     const mod = filterModerator.value;
     const from = fromDateInput.value || "Any";
     const to = toDateInput.value || "Any";
-    doc.text(`Filter – Moderator: ${mod}, From: ${from}, To: ${to}`, 14, y);
+    const newFilter = filterNew.value || "All";
+    const dateMode = dateModeSelect.value || "report";
+    const dateModeLabel = dateMode === "session" ? "Session date" : "Report date";
+
+    doc.text(
+      `Filter – Moderator: ${mod}, Date by: ${dateModeLabel}, New: ${newFilter}, From: ${from}, To: ${to}`,
+      14,
+      y
+    );
     y += 8;
 
     let totalClients = 0;
     let totalScar = 0;
     let totalYou = 0;
+    let totalNew = 0;
+
+    const fromRaw = fromDateInput.value;
+    const toRaw = toDateInput.value;
 
     filteredReports.forEach((r) => {
-      totalClients += (r.totals?.total || 0);
-      totalScar += (r.totals?.scar || 0);
-      totalYou += (r.totals?.you || 0);
+      const t = computeReportTotals(r, dateMode, fromRaw, toRaw);
+      totalClients += t.total;
+      totalScar += t.scar;
+      totalYou += t.you;
+      totalNew += t.totalNew;
     });
 
     doc.setFont("helvetica", "bold");
@@ -641,28 +1133,168 @@
     doc.setFont("helvetica", "normal");
     doc.text(`Reports: ${filteredReports.length}`, 14, y); y += 5;
     doc.text(`Total clients: ${totalClients}`, 14, y); y += 5;
+    doc.text(`Total new clients: ${totalNew}`, 14, y); y += 5;
     doc.text(`Scar Clinic: ${totalScar}`, 14, y); y += 5;
     doc.text(`You Clinic: ${totalYou}`, 14, y); y += 8;
 
-    const tableBody = filteredReports.map((r) => [
-      r.date || "",
-      r.moderator || "",
-      r.shiftLabel || "",
-      r.totals?.total ?? 0,
-      r.totals?.scar ?? 0,
-      r.totals?.you ?? 0,
-    ]);
+    const tableBody = filteredReports.map((r) => {
+      const t = computeReportTotals(r, dateMode, fromRaw, toRaw);
+      return [
+        r.date || "",
+        r.moderator || "",
+        r.shiftLabel || "",
+        t.total,
+        t.totalNew,
+        t.scar,
+        t.you,
+      ];
+    });
 
     doc.autoTable({
       startY: y,
-      head: [["Date", "Moderator", "Shift", "Total", "Scar", "You"]],
+      head: [["Date", "Moderator", "Shift", "Total", "Total New", "Scar", "You"]],
       body: tableBody,
       styles: { fontSize: 8 },
-      headStyles: { fillColor: [56, 189, 248] },
+      headStyles: { fillColor: [56, 189, 248] }
     });
+
+    addFooterToAllPages(doc);
 
     const fileName = `Moderators-Performance-${mod}-${from}-${to}-ScarGroup.pdf`;
     doc.save(fileName);
+  }
+
+  function downloadBookingsExcel() {
+    if (!filteredReports.length) {
+      alert("No reports in current filter.");
+      return;
+    }
+
+    if (typeof XLSX === "undefined") {
+      alert("Excel export library (XLSX) is not loaded.");
+      return;
+    }
+
+    const scarRows = [];
+    const youRows = [];
+
+    const dateMode = dateModeSelect.value || "report";
+    const from = fromDateInput.value;
+    const to = toDateInput.value;
+
+    filteredReports.forEach((report) => {
+      const reportDate = report.date || "";
+      const bookings = Array.isArray(report.bookings) ? report.bookings : [];
+
+      bookings.forEach((b) => {
+        // فلترة بالـ session date لو متختار Session
+        if (dateMode === "session" && (from || to)) {
+          const sd = b.sessionDate || "";
+          if (!sd) return;
+          if (from && sd < from) return;
+          if (to && sd > to) return;
+        }
+
+        const branch = b.branch || report.branch || report.clinic || "";
+        const branchName = (branch || "").toLowerCase();
+
+        const row = {
+          "Report Date": reportDate,
+          "Moderator": report.moderator || "",
+          "Client Name": b.name || "",
+          "Phone": b.phone || "",
+          "Session No.": b.sessionNumber || "",
+          "Session Date": b.sessionDate || "",
+          "Service": b.service || "",
+          "Branch": branch || "",
+          "Attended": "",
+          "New?": bookingIsNew(b) ? "New" : ""
+        };
+
+        if (branchName.includes("you")) {
+          youRows.push(row);
+        } else {
+          scarRows.push(row);
+        }
+      });
+    });
+
+    function sortBySessionDate(rows) {
+      rows.sort((a, b) => {
+        const da = a["Session Date"] || "";
+        const db = b["Session Date"] || "";
+        if (!da && !db) return 0;
+        if (!da) return 1;
+        if (!db) return -1;
+        return da.localeCompare(db);
+      });
+    }
+
+    sortBySessionDate(scarRows);
+    sortBySessionDate(youRows);
+
+    const header = [
+      "Report Date",
+      "Moderator",
+      "Client Name",
+      "Phone",
+      "Session No.",
+      "Session Date",
+      "Service",
+      "Branch",
+      "Attended",
+      "New?"
+    ];
+
+    const wb = XLSX.utils.book_new();
+    const scarSheet = XLSX.utils.json_to_sheet(scarRows, { header });
+    const youSheet = XLSX.utils.json_to_sheet(youRows, { header });
+
+    // Auto-fit columns based on max text length
+    function autoFitColumns(ws, rows) {
+      const colWidths = header.map(h => h.length);
+      rows.forEach(row => {
+        header.forEach((h, idx) => {
+          const val = row[h] == null ? "" : String(row[h]);
+          if (val.length > colWidths[idx]) {
+            colWidths[idx] = val.length;
+          }
+        });
+      });
+      ws['!cols'] = colWidths.map(wch => ({ wch: wch + 2 }));
+    }
+
+    autoFitColumns(scarSheet, scarRows);
+    autoFitColumns(youSheet, youRows);
+
+    // تلوين خانات New اللي فيها "New" باللون الأخضر الفاتح
+    function highlightNew(ws, rows) {
+      const newColIndex = header.indexOf("New?");
+      if (newColIndex < 0) return;
+      rows.forEach((row, idx) => {
+        if (row["New?"] === "New") {
+          const cellAddress = XLSX.utils.encode_cell({ r: idx + 1, c: newColIndex }); // +1 للـ header
+          const cell = ws[cellAddress];
+          if (cell) {
+            cell.s = {
+              fill: { fgColor: { rgb: "FFDCFCE7" } } // أخضر فاتح
+            };
+          }
+        }
+      });
+    }
+
+    highlightNew(scarSheet, scarRows);
+    highlightNew(youSheet, youRows);
+
+    XLSX.utils.book_append_sheet(wb, scarSheet, "Scar");
+    XLSX.utils.book_append_sheet(wb, youSheet, "You");
+
+    const mod = filterModerator.value || "All";
+    const fromLabel = fromDateInput.value || "Any";
+    const toLabel = toDateInput.value || "Any";
+    const fileName = `Bookings-${mod}-${fromLabel}-${toLabel}.xlsx`;
+    XLSX.writeFile(wb, fileName);
   }
 
   async function loadReports() {
@@ -676,22 +1308,42 @@
       const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
       const snap = await getDocs(q);
 
-      allReports = snap.docs.map((d) => ({
-        id: d.id,
-        ...d.data()
-      }));
+      allReports = snap.docs.map((d) => {
+        const data = d.data();
+        const bookings = Array.isArray(data.bookings) ? data.bookings : [];
+        const totalNew = bookings.reduce((acc, b) => acc + (bookingIsNew(b) ? 1 : 0), 0);
+        return {
+          id: d.id,
+          totalNew,
+          ...data
+        };
+      });
 
       filteredReports = allReports.slice();
       applyFilters();
-    } catch (err) {
-      console.error("Error loading reports:", err);
+
+      const moderatorsSet = new Set(["All"]);
+      allReports.forEach((r) => {
+        if (r.moderator) moderatorsSet.add(r.moderator);
+      });
+
+      const currentValue = filterModerator.value || "All";
+      filterModerator.innerHTML = "";
+      moderatorsSet.forEach((name) => {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        filterModerator.appendChild(opt);
+      });
+      if (moderatorsSet.has(currentValue)) {
+        filterModerator.value = currentValue;
+      }
+
+      setConnectionStatus(true, "Connected");
+    } catch (e) {
+      console.error(e);
       setConnectionStatus(false, "Error");
       errorBox.style.display = "block";
-      errorBox.textContent =
-        "Error loading reports: " +
-        (err.code === "permission-denied"
-          ? "Missing or insufficient Firestore permissions."
-          : (err.message || err));
     }
   }
 
@@ -702,21 +1354,26 @@
     applyFiltersBtn.addEventListener("click", applyFilters);
     resetFiltersBtn.addEventListener("click", () => {
       filterModerator.value = "All";
+      filterNew.value = "All";
+      dateModeSelect.value = "report";
       fromDateInput.value = "";
       toDateInput.value = "";
       applyFilters();
     });
 
     downloadPerformanceBtn.addEventListener("click", downloadPerformancePDF);
+    downloadBookingsBtn.addEventListener("click", downloadBookingsExcel);
 
     loadReports();
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
+  // Login handler (مع معالجة الـ lowercase والـ spaces) – اتربط مباشرة عشان يشتغل على طول
+  if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
-      const username = (loginUsername.value || "").trim();
-      const password = loginPassword.value || "";
+      const usernameInput = (loginUsername.value || "").trim();
+      const username = usernameInput.toLowerCase(); // يخليها lowercase عشان مفيش مشكلة حروف كابيتال
+      const password = (loginPassword.value || "").trim();
 
       const expectedPassword = VALID_USERS[username];
 
@@ -729,7 +1386,7 @@
         loginError.style.display = "block";
       }
     });
-  });
+  }
 </script>
 </body>
 </html>
