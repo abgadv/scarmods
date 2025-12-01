@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Moderators Dashboard – Scar Group</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- jsPDF + AutoTable -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
+  <style>
+    :root {
+      --bg: #020617;
+      --card-bg: #020617;
+      --primary: #38bdf8;
+      --primary-soft: rgba(56, 189, 248, 0.12);
+      --primary-dark: #0ea5e9;
+      --border: #1f2933;
+      --text-main: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+      --success: #4ade80;
+      --shadow-soft: 0 18px 40px rgba(15, 23, 42, 0.7);
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      background: radial-gradient(circle at top, #0b1120, #020617 55%);
+      min-height: 100vh;
+      color: var(--text-main);
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .app-shell {
+      width: 100%;
+      max-width: 1100px;
+      margin: 20px 12px;
+    }
+
+    .card {
+      background: radial-gradient(circle at top left, #020617, #020617 50%);
+      border-radius: 24px;
+      box-shadow: var(--shadow-soft);
+      padding: 22px 20px;
+      border: 1px solid rgba(148, 163, 184, 0.2);
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 18px;
+    }
+
+    .title-block h1 {
+      margin: 0;
+      font-size: 1.7rem;
+      font-weight: 700;
+    }
+
+    .title-block span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .status-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #10b98155;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+    }
+
+    .status-pill.error {
+      border-color: rgba(248, 113, 113, 0.7);
+    }
+
+    .status-pill.error .status-dot {
+      background: var(--danger);
+    }
+
+    .filters-row {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 760px) {
+      .filters-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    label {
+      display: block;
+      font-size: 0.8rem;
+      margin-bottom: 2px;
+      color: var(--text-muted);
+    }
+
+    select,
+    input[type="date"],
+    input[type="text"],
+    input[type="password"] {
+      width: 100%;
+      padding: 7px 10px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: #020617;
+      color: var(--text-main);
+      font-size: 0.85rem;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    select:focus,
+    input[type="date"]:focus,
+    input[type="text"]:focus,
+    input[type="password"]:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 1px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 16px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      transition: background 0.15s ease, transform 0.05s ease, box-shadow 0.1s ease;
+      white-space: nowrap;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+      color: #0b1120;
+      box-shadow: 0 10px 20px rgba(56, 189, 248, 0.4);
+    }
+
+    .btn-primary:hover {
+      background: linear-gradient(135deg, #0ea5e9, #22c55e);
+      transform: translateY(-1px);
+      box-shadow: 0 12px 26px rgba(56, 189, 248, 0.55);
+    }
+
+    .btn-secondary {
+      background: rgba(15, 23, 42, 0.95);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: rgba(15, 23, 42, 1);
+      color: var(--text-main);
+    }
+
+    .btn-small {
+      padding: 6px 12px;
+      font-size: 0.78rem;
+    }
+
+    .filters-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+
+    .table-wrapper {
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: radial-gradient(circle at top left, #020617, #020617 55%);
+      padding: 10px;
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+      min-width: 760px;
+      color: var(--text-main);
+    }
+
+    th,
+    td {
+      padding: 7px 8px;
+      text-align: left;
+      border-bottom: 1px solid #111827;
+    }
+
+    thead {
+      background: linear-gradient(90deg, rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.75));
+    }
+
+    th {
+      font-weight: 600;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+
+    tbody tr:hover {
+      background: rgba(15, 23, 42, 0.7);
+    }
+
+    .table-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 10px;
+      gap: 10px;
+      flex-wrap: wrap;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid rgba(148, 163, 184, 0.4);
+      font-size: 0.78rem;
+    }
+
+    .badge strong {
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .error-message {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--danger);
+    }
+
+    @media (max-width: 640px) {
+      .card {
+        padding: 18px 14px;
+      }
+
+      .filters-actions {
+        flex-direction: column-reverse;
+        align-items: stretch;
+      }
+
+      .btn-block-mobile {
+        width: 100%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Login Shell -->
+<div class="app-shell" id="loginShell">
+  <div class="card">
+    <div class="header">
+      <div class="title-block">
+        <h1>Admin Login</h1>
+        <span>Access moderators dashboard</span>
+      </div>
+    </div>
+    <form id="loginForm">
+      <div style="display:grid;grid-template-columns:1fr;gap:10px;margin-bottom:12px;">
+        <div>
+          <label for="loginUsername">Username</label>
+          <input type="text" id="loginUsername" autocomplete="username" />
+        </div>
+        <div>
+          <label for="loginPassword">Password</label>
+          <input type="password" id="loginPassword" autocomplete="current-password" />
+        </div>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block-mobile">Login</button>
+      <div id="loginError" class="error-message" style="display:none;">Invalid username or password.</div>
+    </form>
+  </div>
+</div>
+
+<!-- Dashboard Shell -->
+<div class="app-shell" id="dashboardShell" style="display:none;">
+  <div class="card">
+    <div class="header">
+      <div class="title-block">
+        <h1>Moderators Dashboard – Scar Group</h1>
+        <span>Filter reports by moderator & date, download PDFs any time.</span>
+      </div>
+      <div id="connectionStatus" class="status-pill">
+        <span class="status-dot"></span>
+        <span id="connectionText">Connecting…</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-row">
+      <div>
+        <label for="filterModerator">Moderator</label>
+        <select id="filterModerator">
+          <option value="All">All</option>
+          <option>Shahd</option>
+          <option>Manar</option>
+          <option>Treeza</option>
+          <option>Engy</option>
+          <option>Monica</option>
+          <option>Zeinab</option>
+          <option>Samah</option>
+        </select>
+      </div>
+      <div>
+        <label for="fromDate">From date</label>
+        <input type="date" id="fromDate" />
+      </div>
+      <div>
+        <label for="toDate">To date</label>
+        <input type="date" id="toDate" />
+      </div>
+      <div>
+        <label>&nbsp;</label>
+        <div class="filters-actions">
+          <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small btn-block-mobile">
+            Reset
+          </button>
+          <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small btn-block-mobile">
+            Apply
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:4px; margin-bottom:8px;">
+      <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
+        📥 Download performance PDF (current filter)
+      </button>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrapper">
+      <table>
+        <thead>
+        <tr>
+          <th>Date</th>
+          <th>Moderator</th>
+          <th>Shift</th>
+          <th>Total clients</th>
+          <th>Scar</th>
+          <th>You</th>
+          <th>Created</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody id="reportsBody">
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-footer">
+      <div class="badge">
+        Reports loaded: <strong id="reportsCount">0</strong>
+      </div>
+      <div class="badge">
+        Total clients (filtered): <strong id="totalClientsFiltered">0</strong>
+      </div>
+    </div>
+
+    <div id="errorBox" class="error-message" style="display:none;"></div>
+  </div>
+</div>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import {
+    getFirestore,
+    collection,
+    getDocs,
+    query,
+    orderBy
+  } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyDpG7Ja5HCfU2RnGJuxXU5ypPA7JKgYY7U",
+    authDomain: "clinic-725a7.firebaseapp.com",
+    projectId: "clinic-725a7",
+    storageBucket: "clinic-725a7.firebasestorage.app",
+    messagingSenderId: "644725580556",
+    appId: "1:644725580556:web:a5947d966e711888125f29",
+    measurementId: "G-82J5FZ1M07"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  const connectionStatus = document.getElementById("connectionStatus");
+  const connectionText = document.getElementById("connectionText");
+
+  const filterModerator = document.getElementById("filterModerator");
+  const fromDateInput = document.getElementById("fromDate");
+  const toDateInput = document.getElementById("toDate");
+  const resetFiltersBtn = document.getElementById("resetFiltersBtn");
+  const applyFiltersBtn = document.getElementById("applyFiltersBtn");
+  const downloadPerformanceBtn = document.getElementById("downloadPerformanceBtn");
+
+  const reportsBody = document.getElementById("reportsBody");
+  const reportsCountSpan = document.getElementById("reportsCount");
+  const totalClientsFilteredSpan = document.getElementById("totalClientsFiltered");
+  const errorBox = document.getElementById("errorBox");
+
+  const loginShell = document.getElementById("loginShell");
+  const dashboardShell = document.getElementById("dashboardShell");
+  const loginForm = document.getElementById("loginForm");
+  const loginUsername = document.getElementById("loginUsername");
+  const loginPassword = document.getElementById("loginPassword");
+  const loginError = document.getElementById("loginError");
+
+  // ثابت لليوزرنيم والباسوردات
+  const VALID_USERS = {
+    "islam": "gasd53ds4fs5dg34",
+    "andrew": "5345asd54fffdg23",
+    "baraa": "21354adfs54g1sf5",
+    "hakim": "fs54g53df4gh3d5s",
+    "admin": "fg2hd5435ads4as5",
+    "engy": "asdfighy321df3as"
+  };
+
+  let allReports = [];
+  let filteredReports = [];
+  let isDashboardInitialized = false;
+
+  function setConnectionStatus(ok, msg) {
+    connectionStatus.classList.toggle("error", !ok);
+    connectionText.textContent = msg;
+  }
+
+  function applyFilters() {
+    errorBox.style.display = "none";
+    const mod = filterModerator.value;
+    const from = fromDateInput.value;
+    const to = toDateInput.value;
+
+    filteredReports = allReports.filter((r) => {
+      if (mod !== "All" && r.moderator !== mod) return false;
+      if (from && r.date && r.date < from) return false;
+      if (to && r.date && r.date > to) return false;
+      return true;
+    });
+
+    renderTable();
+  }
+
+  function renderTable() {
+    reportsBody.innerHTML = "";
+    let totalClients = 0;
+
+    filteredReports.forEach((r) => {
+      const tr = document.createElement("tr");
+
+      const created = r.createdAt && r.createdAt.toDate
+        ? r.createdAt.toDate()
+        : null;
+
+      const createdStr = created
+        ? created.toLocaleString()
+        : "-";
+
+      totalClients += (r.totals?.total || 0);
+
+      tr.innerHTML = `
+        <td>${r.date || "-"}</td>
+        <td>${r.moderator || "-"}</td>
+        <td>${r.shiftLabel || "-"}</td>
+        <td>${r.totals?.total ?? 0}</td>
+        <td>${r.totals?.scar ?? 0}</td>
+        <td>${r.totals?.you ?? 0}</td>
+        <td>${createdStr}</td>
+        <td>
+          <button class="btn btn-secondary btn-small" data-id="${r.id}">Download PDF</button>
+        </td>
+      `;
+
+      tr.querySelector("button").addEventListener("click", () => {
+        downloadSingleReportPDF(r);
+      });
+
+      reportsBody.appendChild(tr);
+    });
+
+    reportsCountSpan.textContent = filteredReports.length.toString();
+    totalClientsFilteredSpan.textContent = totalClients.toString();
+  }
+
+  function downloadSingleReportPDF(report) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const {
+      moderator,
+      date,
+      shiftLabel,
+      cover,
+      checkIn,
+      checkOut,
+      totals,
+      bookings = [],
+      clinic
+    } = report;
+
+    let y = 14;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text(`Moderators Daily Report – ${clinic || "Scar Group"}`, 14, y);
+    y += 8;
+
+    doc.setFontSize(11);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Moderator: ${moderator || "-"}`, 14, y); y += 6;
+    doc.text(`Date: ${date || "-"}`, 14, y); y += 6;
+    doc.text(`Shift: ${shiftLabel || "-"}`, 14, y); y += 6;
+
+    if (cover) {
+      doc.text(`Covering for: ${cover.coverFor || "-"}`, 14, y); y += 6;
+      doc.text(`Covered shift: ${cover.coverShiftLabel || cover.coverShift || "-"}`, 14, y); y += 6;
+    }
+
+    doc.text(`Check In: ${checkIn?.formatted || "-"}`, 14, y); y += 6;
+    if (checkIn && checkIn.diffMinutes != null) {
+      const d = checkIn.diffMinutes;
+      const txt = d > 2 ? `Late by ${Math.round(d)} min`
+        : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
+        : "On time";
+      doc.text(`Check In status: ${txt}`, 14, y); y += 6;
+    }
+
+    doc.text(`Check Out: ${checkOut?.formatted || "-"}`, 14, y); y += 6;
+    if (checkOut && checkOut.diffMinutes != null) {
+      const d = checkOut.diffMinutes;
+      const txt = d > 2 ? `Late by ${Math.round(d)} min`
+        : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
+        : "On time";
+      doc.text(`Check Out status: ${txt}`, 14, y); y += 8;
+    } else {
+      y += 4;
+    }
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Clients Summary", 14, y); y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Total clients: ${totals?.total ?? 0}`, 14, y); y += 5;
+    doc.text(`Scar Clinic clients: ${totals?.scar ?? 0}`, 14, y); y += 5;
+    doc.text(`You Clinic clients: ${totals?.you ?? 0}`, 14, y); y += 6;
+
+    const tableBody = bookings.map((b, idx) => [
+      (idx + 1).toString(),
+      b.name || "",
+      b.phone || "",
+      b.sessionNumber || "",
+      b.sessionDate || "",
+      b.service || "",
+      b.platform || "",
+      b.branch || "",
+      b.marked || "",
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked"]],
+
+      body: tableBody,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [56, 189, 248] },
+    });
+
+    const fileName = `${moderator || "Moderator"}-${date || "report"}-ScarGroup.pdf`;
+    doc.save(fileName);
+  }
+
+  function downloadPerformancePDF() {
+    if (!filteredReports.length) {
+      alert("No reports in current filter.");
+      return;
+    }
+
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    let y = 14;
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Moderators Performance – Scar Group", 14, y);
+    y += 8;
+
+    doc.setFontSize(10);
+    const mod = filterModerator.value;
+    const from = fromDateInput.value || "Any";
+    const to = toDateInput.value || "Any";
+    doc.text(`Filter – Moderator: ${mod}, From: ${from}, To: ${to}`, 14, y);
+    y += 8;
+
+    let totalClients = 0;
+    let totalScar = 0;
+    let totalYou = 0;
+
+    filteredReports.forEach((r) => {
+      totalClients += (r.totals?.total || 0);
+      totalScar += (r.totals?.scar || 0);
+      totalYou += (r.totals?.you || 0);
+    });
+
+    doc.setFont("helvetica", "bold");
+    doc.text("Summary", 14, y); y += 6;
+    doc.setFont("helvetica", "normal");
+    doc.text(`Reports: ${filteredReports.length}`, 14, y); y += 5;
+    doc.text(`Total clients: ${totalClients}`, 14, y); y += 5;
+    doc.text(`Scar Clinic: ${totalScar}`, 14, y); y += 5;
+    doc.text(`You Clinic: ${totalYou}`, 14, y); y += 8;
+
+    const tableBody = filteredReports.map((r) => [
+      r.date || "",
+      r.moderator || "",
+      r.shiftLabel || "",
+      r.totals?.total ?? 0,
+      r.totals?.scar ?? 0,
+      r.totals?.you ?? 0,
+    ]);
+
+    doc.autoTable({
+      startY: y,
+      head: [["Date", "Moderator", "Shift", "Total", "Scar", "You"]],
+      body: tableBody,
+      styles: { fontSize: 8 },
+      headStyles: { fillColor: [56, 189, 248] },
+    });
+
+    const fileName = `Moderators-Performance-${mod}-${from}-${to}-ScarGroup.pdf`;
+    doc.save(fileName);
+  }
+
+  async function loadReports() {
+    try {
+      setConnectionStatus(true, "Connected");
+      errorBox.style.display = "none";
+      reportsBody.innerHTML = "";
+      reportsCountSpan.textContent = "0";
+      totalClientsFilteredSpan.textContent = "0";
+
+      const q = query(collection(db, "reports"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+
+      allReports = snap.docs.map((d) => ({
+        id: d.id,
+        ...d.data()
+      }));
+
+      filteredReports = allReports.slice();
+      applyFilters();
+    } catch (err) {
+      console.error("Error loading reports:", err);
+      setConnectionStatus(false, "Error");
+      errorBox.style.display = "block";
+      errorBox.textContent =
+        "Error loading reports: " +
+        (err.code === "permission-denied"
+          ? "Missing or insufficient Firestore permissions."
+          : (err.message || err));
+    }
+  }
+
+  function initDashboardOnce() {
+    if (isDashboardInitialized) return;
+    isDashboardInitialized = true;
+
+    applyFiltersBtn.addEventListener("click", applyFilters);
+    resetFiltersBtn.addEventListener("click", () => {
+      filterModerator.value = "All";
+      fromDateInput.value = "";
+      toDateInput.value = "";
+      applyFilters();
+    });
+
+    downloadPerformanceBtn.addEventListener("click", downloadPerformancePDF);
+
+    loadReports();
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    loginForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const username = (loginUsername.value || "").trim();
+      const password = loginPassword.value || "";
+
+      const expectedPassword = VALID_USERS[username];
+
+      if (expectedPassword && expectedPassword === password) {
+        loginError.style.display = "none";
+        loginShell.style.display = "none";
+        dashboardShell.style.display = "block";
+        initDashboardOnce();
+      } else {
+        loginError.style.display = "block";
+      }
+    });
+  });
+</script>
+</body>
+</html>
