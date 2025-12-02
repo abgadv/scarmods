@@ -53,8 +53,8 @@
 
     .card {
       background: radial-gradient(circle at top left, rgba(56, 189, 248, 0.1), transparent 55%),
-                  radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 50%),
-                  #020617;
+      radial-gradient(circle at top right, rgba(34, 197, 94, 0.08), transparent 50%),
+      #020617;
       border-radius: 22px;
       padding: 20px 18px 22px;
       box-shadow: var(--shadow-soft);
@@ -149,10 +149,10 @@
       box-shadow: var(--shadow-sm);
     }
 
-    /* === تعديل مقاس الأعمدة بتاعة الفلاتر === */
     .filters-grid {
       display: grid;
-      grid-template-columns: 1.1fr 1.1fr 1.2fr 0.9fr 0.9fr; /* التواريخ قد بعض والباقي أقصر شوية */
+      /* مقاسات متناسقة – التواريخ قد بعض */
+      grid-template-columns: 1.2fr 1fr 1.1fr 1.1fr 1.1fr;
       gap: 10px;
       align-items: end;
     }
@@ -504,26 +504,29 @@
       opacity: 0.85;
     }
 
-    /* === Overlay panel لعرض الـ Booking data === */
-    .overlay {
+    /* Overlay Panel for Booking data preview */
+    .overlay-backdrop {
       position: fixed;
       inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(6px);
       display: none;
       align-items: center;
       justify-content: center;
-      background: rgba(15, 23, 42, 0.88);
-      backdrop-filter: blur(6px);
       z-index: 999;
     }
 
+    .overlay-backdrop.active {
+      display: flex;
+    }
+
     .overlay-panel {
-      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.99) 40%, #020617 100%);
-      border-radius: 20px;
-      border: 1px solid rgba(55, 65, 81, 0.9);
-      box-shadow: var(--shadow-soft);
-      width: 100%;
-      max-width: 1000px;
-      max-height: calc(100vh - 80px);
+      width: min(1000px, 96vw);
+      max-height: 82vh;
+      border-radius: 22px;
+      background: radial-gradient(circle at top, rgba(15,23,42,0.97), #020617 80%);
+      border: 1px solid rgba(55,65,81,0.95);
+      box-shadow: 0 22px 60px rgba(0,0,0,0.75);
       display: flex;
       flex-direction: column;
       overflow: hidden;
@@ -532,53 +535,111 @@
     .overlay-header {
       padding: 14px 16px 10px;
       display: flex;
-      justify-content: space-between;
       align-items: center;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(31,41,55,0.9);
     }
 
-    .overlay-header h2 {
-      margin: 0;
-      font-size: 16px;
-    }
-
-    .overlay-header p {
-      margin: 2px 0 0;
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-
-    .overlay-header-left {
+    .overlay-header-title {
       display: flex;
       flex-direction: column;
       gap: 2px;
     }
 
+    .overlay-header-title h3 {
+      margin: 0;
+      font-size: 15px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .overlay-header-title p {
+      margin: 0;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .overlay-close-btn {
+      border-radius: 999px;
+      width: 28px;
+      height: 28px;
+      border: 1px solid rgba(55,65,81,0.9);
+      background: rgba(15,23,42,0.95);
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .overlay-close-btn:hover {
+      background: rgba(31,41,55,1);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
     .overlay-body {
-      padding: 10px 14px 12px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      height: 100%;
-    }
-
-    .overlay-actions {
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .overlay-table-wrapper {
+      padding: 10px 14px 8px;
       flex: 1;
-      min-height: 0;
-      border-radius: 14px;
       overflow: auto;
     }
 
-    .overlay table {
+    .overlay-table-wrapper {
+      border-radius: 14px;
+      border: 1px solid rgba(55,65,81,0.9);
+      overflow: auto;
+      background: rgba(15,23,42,0.98);
+    }
+
+    .overlay-table {
+      width: 100%;
+      border-collapse: collapse;
       font-size: 11px;
-      min-width: 750px;
+      min-width: 900px;
+    }
+
+    .overlay-table thead {
+      background: linear-gradient(90deg, rgba(15,23,42,1), rgba(15,23,42,0.98));
+    }
+
+    .overlay-table th {
+      padding: 8px 8px;
+      font-weight: 500;
+      color: var(--text-muted);
+      text-align: left;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      white-space: nowrap;
+    }
+
+    .overlay-table td {
+      padding: 7px 8px;
+      border-bottom: 1px solid rgba(31,41,55,0.85);
+      white-space: nowrap;
+    }
+
+    .overlay-footer {
+      padding: 10px 14px 12px;
+      border-top: 1px solid rgba(31,41,55,0.9);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .overlay-footer-left {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .overlay-footer-left strong {
+      color: var(--text-main);
     }
 
     @media (max-width: 900px) {
@@ -615,10 +676,6 @@
         width: 100%;
         justify-content: center;
       }
-
-      .overlay-panel {
-        max-width: calc(100% - 20px);
-      }
     }
 
     @media (max-width: 640px) {
@@ -642,6 +699,15 @@
       .table-footer {
         flex-direction: column;
         align-items: flex-start;
+      }
+
+      .overlay-panel {
+        width: 96vw;
+        max-height: 88vh;
+      }
+
+      .overlay-table {
+        min-width: 700px;
       }
     }
 
@@ -769,8 +835,7 @@
           <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
             📥 Download performance PDF (current filter)
           </button>
-          <!-- تغيير النص لـ Booking data -->
-          <button type="button" id="downloadBookingsBtn" class="btn btn-secondary btn-block-mobile">
+          <button type="button" id="bookingDataBtn" class="btn btn-secondary btn-block-mobile">
             📊 Booking data
           </button>
         </div>
@@ -815,30 +880,21 @@
     </div>
   </div>
 
-  <!-- Overlay Panel لعرض الـ Booking data -->
-  <div id="bookingsOverlay" class="overlay">
+  <!-- Booking Data Overlay -->
+  <div id="bookingsOverlay" class="overlay-backdrop">
     <div class="overlay-panel">
       <div class="overlay-header">
-        <div class="overlay-header-left">
-          <h2>Booking data</h2>
-          <p>Preview, mark attendance, and export Excel for the current filter.</p>
+        <div class="overlay-header-title">
+          <h3>📊 Booking data (current filter)</h3>
+          <p>Review and mark attended status before exporting to Excel.</p>
         </div>
-        <button type="button" id="closeBookingsOverlay" class="btn-icon" title="Close">
+        <button type="button" id="closeBookingsOverlayBtn" class="overlay-close-btn" aria-label="Close">
           ✕
         </button>
       </div>
       <div class="overlay-body">
-        <div class="overlay-actions">
-          <button type="button" id="saveAttendanceBtn" class="btn btn-primary btn-small">
-            💾 Save
-          </button>
-          <button type="button" id="downloadExcelFromOverlayBtn" class="btn btn-secondary btn-small">
-            📊 Download Excel sheet
-          </button>
-        </div>
-
-        <div class="table-wrapper overlay-table-wrapper">
-          <table>
+        <div class="overlay-table-wrapper">
+          <table class="overlay-table">
             <thead>
             <tr>
               <th>Report Date</th>
@@ -853,9 +909,25 @@
               <th>New?</th>
             </tr>
             </thead>
-            <tbody id="bookingsPreviewBody">
+            <tbody id="bookingsTableBody">
             </tbody>
           </table>
+        </div>
+      </div>
+      <div class="overlay-footer">
+        <div class="overlay-footer-left">
+          <span class="badge">
+            <span class="badge-dot purple"></span>
+            Rows: <strong id="bookingsRowsCount">0</strong>
+          </span>
+        </div>
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button type="button" id="saveBookingsBtn" class="btn btn-primary">
+            💾 Save attended
+          </button>
+          <button type="button" id="downloadBookingsExcelBtn" class="btn btn-secondary">
+            📥 Download Excel sheet
+          </button>
         </div>
       </div>
     </div>
@@ -874,7 +946,9 @@
     collection,
     getDocs,
     orderBy,
-    query
+    query,
+    doc,
+    writeBatch,
   } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -902,7 +976,7 @@
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
   const applyFiltersBtn = document.getElementById("applyFiltersBtn");
   const downloadPerformanceBtn = document.getElementById("downloadPerformanceBtn");
-  const downloadBookingsBtn = document.getElementById("downloadBookingsBtn");
+  const bookingDataBtn = document.getElementById("bookingDataBtn");
 
   const reportsBody = document.getElementById("reportsBody");
   const reportsCountSpan = document.getElementById("reportsCount");
@@ -916,12 +990,13 @@
   const loginPassword = document.getElementById("loginPassword");
   const loginError = document.getElementById("loginError");
 
-  // عناصر الـ overlay
+  // Overlay elements
   const bookingsOverlay = document.getElementById("bookingsOverlay");
-  const bookingsPreviewBody = document.getElementById("bookingsPreviewBody");
-  const closeBookingsOverlayBtn = document.getElementById("closeBookingsOverlay");
-  const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
-  const downloadExcelFromOverlayBtn = document.getElementById("downloadExcelFromOverlayBtn");
+  const closeBookingsOverlayBtn = document.getElementById("closeBookingsOverlayBtn");
+  const bookingsTableBody = document.getElementById("bookingsTableBody");
+  const bookingsRowsCount = document.getElementById("bookingsRowsCount");
+  const saveBookingsBtn = document.getElementById("saveBookingsBtn");
+  const downloadBookingsExcelBtn = document.getElementById("downloadBookingsExcelBtn");
 
   // ثابت لليوزرنيم والباسوردات
   const VALID_USERS = {
@@ -937,54 +1012,10 @@
   let filteredReports = [];
   let isDashboardInitialized = false;
 
+  // صفوف الـ preview مع الميتا الخاصة بكل حجز
+  let currentBookingPreviewRows = [];
+
   const FOOTER_TEXT = "© Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan";
-
-  /* ====== تخزين الـ Attended في localStorage ====== */
-  const ATTENDED_STORAGE_KEY = "mods_attended_v1";
-  let attendedMap = {};
-
-  function loadAttendedFromStorage() {
-    try {
-      const raw = localStorage.getItem(ATTENDED_STORAGE_KEY);
-      attendedMap = raw ? JSON.parse(raw) : {};
-    } catch {
-      attendedMap = {};
-    }
-  }
-
-  function saveAttendedToStorage() {
-    try {
-      localStorage.setItem(ATTENDED_STORAGE_KEY, JSON.stringify(attendedMap));
-    } catch {
-      // ignore
-    }
-  }
-
-  function getBookingKey(report, booking) {
-    return [
-      report.id || "",
-      booking.sessionNumber || "",
-      booking.phone || "",
-      booking.sessionDate || "",
-      booking.name || ""
-    ].join("|");
-  }
-
-  function isBookingAttended(report, booking) {
-    const key = getBookingKey(report, booking);
-    return !!attendedMap[key];
-  }
-
-  function setBookingAttended(report, booking, value) {
-    const key = getBookingKey(report, booking);
-    if (value) {
-      attendedMap[key] = true;
-    } else {
-      delete attendedMap[key];
-    }
-  }
-
-  loadAttendedFromStorage();
 
   function setConnectionStatus(ok, msg) {
     connectionStatus.classList.toggle("error", !ok);
@@ -1023,6 +1054,19 @@
     return false;
   }
 
+  // attended flag من الداتا بيز
+  function bookingIsAttended(b) {
+    if (!b) return false;
+    const raw = b.attended;
+    if (typeof raw === "boolean") return raw;
+    if (typeof raw === "number") return raw === 1;
+    if (typeof raw === "string") {
+      const v = raw.trim().toLowerCase();
+      return v === "yes" || v === "true" || v === "1";
+    }
+    return false;
+  }
+
   function applyFilters() {
     errorBox.style.display = "none";
 
@@ -1035,10 +1079,12 @@
     const newFilteredReports = [];
 
     allReports.forEach((r) => {
+      // Filter by moderator
       if (mod !== "All" && r.moderator !== mod) return;
 
       const bookingsArray = Array.isArray(r.bookings) ? r.bookings : [];
 
+      // Date filter when mode = report
       let passesReportDate = true;
       if (dateMode === "report") {
         if (from && r.date && r.date < from) passesReportDate = false;
@@ -1049,6 +1095,7 @@
         return;
       }
 
+      // فلترة الـ bookings بناءً على New + Session date عند الحاجة
       const filteredBookings = bookingsArray.filter((b) => {
         const isNew = bookingIsNew(b);
 
@@ -1064,6 +1111,7 @@
         return true;
       });
 
+      // نقرر نعرض الريبورت ولا لأ
       let includeReport = true;
       if (dateMode === "session") {
         includeReport = filteredBookings.length > 0;
@@ -1075,6 +1123,7 @@
 
       if (!includeReport) return;
 
+      // حساب التوتال بناء على الـ filteredBookings لو موجودة
       let visibleTotals;
       let visibleTotalNew;
 
@@ -1228,7 +1277,7 @@
       const d = checkIn.diffMinutes;
       const txt = d > 2 ? `Late by ${Math.round(d)} min`
         : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
-        : "On time";
+          : "On time";
       doc.text(`Check In status: ${txt}`, 14, y); y += 6;
     }
 
@@ -1237,7 +1286,7 @@
       const d = checkOut.diffMinutes;
       const txt = d > 2 ? `Late by ${Math.round(d)} min`
         : d < -2 ? `Early by ${Math.abs(Math.round(d))} min`
-        : "On time";
+          : "On time";
       doc.text(`Check Out status: ${txt}`, 14, y); y += 8;
     } else {
       y += 4;
@@ -1360,11 +1409,10 @@
     doc.save(fileName);
   }
 
-  /* ====== بناء جدول الـ overlay من نفس الداتا بتاعة Excel ====== */
-  function buildBookingsPreviewTable() {
-    bookingsPreviewBody.innerHTML = "";
-
-    const rows = [];
+  // بناء بيانات bookings للإكسيل أو الـ overlay
+  function buildBookingsRowsFromFilteredReports() {
+    const scarRows = [];
+    const youRows = [];
 
     filteredReports.forEach((report) => {
       const reportDate = report.date || "";
@@ -1373,88 +1421,39 @@
         : [];
 
       bookings.forEach((b) => {
-        rows.push({
-          report,
-          booking: b,
-          data: {
-            "Report Date": reportDate,
-            "Moderator": report.moderator || "",
-            "Client Name": b.name || "",
-            "Phone": b.phone || "",
-            "Session No.": b.sessionNumber || "",
-            "Session Date": b.sessionDate || "",
-            "Service": b.service || "",
-            "Branch": b.branch || report.branch || report.clinic || "",
-            "New?": bookingIsNew(b) ? "New" : ""
-          }
-        });
+        const branchFallback = b.branch || report.branch || report.clinic || "";
+        const branchNameLower = (branchFallback || "").toLowerCase();
+        const attended = bookingIsAttended(b);
+
+        const baseRow = {
+          "Report Date": reportDate,
+          "Moderator": report.moderator || "",
+          "Client Name": b.name || "",
+          "Phone": b.phone || "",
+          "Session No.": b.sessionNumber || "",
+          "Session Date": b.sessionDate || "",
+          "Service": b.service || "",
+          "Branch": branchFallback || "",
+          "Attended": attended ? "Yes" : "",
+          "New?": bookingIsNew(b) ? "New" : ""
+        };
+
+        const meta = {
+          reportId: report.id,
+          bookingRef: b,
+          row: baseRow,
+          isYou: branchNameLower.includes("you")
+        };
+
+        if (meta.isYou) {
+          youRows.push(meta);
+        } else {
+          scarRows.push(meta);
+        }
       });
     });
 
-    // نفس ترتيب الـ Excel: حسب Session Date
-    rows.sort((a, b) => {
-      const da = a.data["Session Date"] || "";
-      const db = b.data["Session Date"] || "";
-      if (!da && !db) return 0;
-      if (!da) return 1;
-      if (!db) return -1;
-      return da.localeCompare(db);
-    });
-
-    rows.forEach(({ report, booking, data }) => {
-      const tr = document.createElement("tr");
-
-      const headerOrder = [
-        "Report Date",
-        "Moderator",
-        "Client Name",
-        "Phone",
-        "Session No.",
-        "Session Date",
-        "Service",
-        "Branch"
-      ];
-
-      headerOrder.forEach((h) => {
-        const td = document.createElement("td");
-        td.textContent = data[h] || "";
-        tr.appendChild(td);
-      });
-
-      // Attended checkbox
-      const attendedTd = document.createElement("td");
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = isBookingAttended(report, booking);
-      cb.addEventListener("change", () => {
-        setBookingAttended(report, booking, cb.checked);
-        saveAttendedToStorage(); // نحفظ مباشرة عشان لما يرجع يلاقيها زي ما هي
-      });
-      attendedTd.appendChild(cb);
-      tr.appendChild(attendedTd);
-
-      // New?
-      const newTd = document.createElement("td");
-      newTd.textContent = data["New?"] || "";
-      tr.appendChild(newTd);
-
-      bookingsPreviewBody.appendChild(tr);
-    });
-  }
-
-  function openBookingsOverlay() {
-    if (!filteredReports.length) {
-      alert("No reports in current filter.");
-      return;
-    }
-    buildBookingsPreviewTable();
-    bookingsOverlay.style.display = "flex";
-    document.body.style.overflow = "hidden";
-  }
-
-  function closeBookingsOverlay() {
-    bookingsOverlay.style.display = "none";
-    document.body.style.overflow = "";
+    return { scarRows, youRows };
   }
 
   function downloadBookingsExcel() {
@@ -1468,41 +1467,11 @@
       return;
     }
 
-    const scarRows = [];
-    const youRows = [];
+    const { scarRows, youRows } = buildBookingsRowsFromFilteredReports();
 
-    filteredReports.forEach((report) => {
-      const reportDate = report.date || "";
-      const bookings = Array.isArray(report.visibleBookings || report.bookings)
-        ? (report.visibleBookings || report.bookings)
-        : [];
-
-      bookings.forEach((b) => {
-        const branch = b.branch || report.branch || report.clinic || "";
-        const branchName = (branch || "").toLowerCase();
-
-        const attended = isBookingAttended(report, b) ? "Yes" : "";
-
-        const row = {
-          "Report Date": reportDate,
-          "Moderator": report.moderator || "",
-          "Client Name": b.name || "",
-          "Phone": b.phone || "",
-          "Session No.": b.sessionNumber || "",
-          "Session Date": b.sessionDate || "",
-          "Service": b.service || "",
-          "Branch": branch || "",
-          "Attended": attended,
-          "New?": bookingIsNew(b) ? "New" : ""
-        };
-
-        if (branchName.includes("you")) {
-          youRows.push(row);
-        } else {
-          scarRows.push(row);
-        }
-      });
-    });
+    // نحول من meta لـ rows بس
+    const scarRowsPlain = scarRows.map(m => m.row);
+    const youRowsPlain = youRows.map(m => m.row);
 
     function sortBySessionDate(rows) {
       rows.sort((a, b) => {
@@ -1515,8 +1484,8 @@
       });
     }
 
-    sortBySessionDate(scarRows);
-    sortBySessionDate(youRows);
+    sortBySessionDate(scarRowsPlain);
+    sortBySessionDate(youRowsPlain);
 
     const header = [
       "Report Date",
@@ -1532,8 +1501,8 @@
     ];
 
     const wb = XLSX.utils.book_new();
-    const scarSheet = XLSX.utils.json_to_sheet(scarRows, { header });
-    const youSheet = XLSX.utils.json_to_sheet(youRows, { header });
+    const scarSheet = XLSX.utils.json_to_sheet(scarRowsPlain, { header });
+    const youSheet = XLSX.utils.json_to_sheet(youRowsPlain, { header });
 
     function autoFitColumns(ws, rows) {
       const colWidths = header.map(h => h.length);
@@ -1548,28 +1517,8 @@
       ws['!cols'] = colWidths.map(wch => ({ wch: wch + 2 }));
     }
 
-    autoFitColumns(scarSheet, scarRows);
-    autoFitColumns(youSheet, youRows);
-
-    // تلوين خانات New اللي فيها "New" باللون الأخضر الفاتح
-    function highlightNew(ws, rows) {
-      const newColIndex = header.indexOf("New?");
-      if (newColIndex < 0) return;
-      rows.forEach((row, idx) => {
-        if (row["New?"] === "New") {
-          const cellAddress = XLSX.utils.encode_cell({ r: idx + 1, c: newColIndex }); // +1 للـ header
-          const cell = ws[cellAddress];
-          if (cell) {
-            cell.s = {
-              fill: { fgColor: { rgb: "FFDCFCE7" } } // أخضر فاتح
-            };
-          }
-        }
-      });
-    }
-
-    highlightNew(scarSheet, scarRows);
-    highlightNew(youSheet, youRows);
+    autoFitColumns(scarSheet, scarRowsPlain);
+    autoFitColumns(youSheet, youRowsPlain);
 
     XLSX.utils.book_append_sheet(wb, scarSheet, "Scar");
     XLSX.utils.book_append_sheet(wb, youSheet, "You");
@@ -1580,6 +1529,133 @@
     const mode = dateFilterMode.value === "session" ? "Session" : "Report";
     const fileName = `Bookings-${mod}-${from}-${to}-${mode}.xlsx`;
     XLSX.writeFile(wb, fileName);
+  }
+
+  // Overlay – فتح وبناء الجدول
+  function openBookingsOverlay() {
+    if (!filteredReports.length) {
+      alert("No reports in current filter.");
+      return;
+    }
+
+    bookingsTableBody.innerHTML = "";
+    currentBookingPreviewRows = [];
+
+    const { scarRows, youRows } = buildBookingsRowsFromFilteredReports();
+    const allMetaRows = [...scarRows, ...youRows];
+
+    allMetaRows.forEach((meta, index) => {
+      const { reportId, bookingRef, row, isYou } = meta;
+      const originalReport = allReports.find(r => r.id === reportId) || {};
+      const originalBookings = Array.isArray(originalReport.bookings) ? originalReport.bookings : [];
+      const bookingIndex = originalBookings.indexOf(bookingRef); // نفس الريفرنس
+
+      const attended = bookingIsAttended(bookingRef);
+
+      currentBookingPreviewRows.push({
+        reportId,
+        bookingIndex,
+        bookingRef,
+        isYou,
+        data: row,
+        attended
+      });
+
+      const tr = document.createElement("tr");
+      tr.dataset.index = String(index);
+
+      function addCell(text) {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.appendChild(td);
+      }
+
+      addCell(row["Report Date"]);
+      addCell(row["Moderator"]);
+      addCell(row["Client Name"]);
+      addCell(row["Phone"]);
+      addCell(row["Session No."]);
+      addCell(row["Session Date"]);
+      addCell(row["Service"]);
+      addCell(row["Branch"]);
+
+      // Attended checkbox
+      const attendedTd = document.createElement("td");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = attended;
+      cb.dataset.index = String(index);
+      cb.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.index, 10);
+        if (!Number.isNaN(idx) && currentBookingPreviewRows[idx]) {
+          currentBookingPreviewRows[idx].attended = e.target.checked;
+        }
+      });
+      attendedTd.appendChild(cb);
+      tr.appendChild(attendedTd);
+
+      const newTd = document.createElement("td");
+      newTd.textContent = bookingIsNew(bookingRef) ? "New" : "";
+      tr.appendChild(newTd);
+
+      bookingsTableBody.appendChild(tr);
+    });
+
+    bookingsRowsCount.textContent = String(currentBookingPreviewRows.length);
+    bookingsOverlay.classList.add("active");
+  }
+
+  function closeBookingsOverlay() {
+    bookingsOverlay.classList.remove("active");
+  }
+
+  async function saveBookingsAttended() {
+    if (!currentBookingPreviewRows.length) {
+      alert("No booking rows to save.");
+      return;
+    }
+
+    try {
+      const batch = writeBatch(db);
+
+      // نجمع التغييرات لكل report
+      const updatesByReport = new Map();
+
+      currentBookingPreviewRows.forEach((row) => {
+        if (row.bookingIndex < 0) return;
+        if (!updatesByReport.has(row.reportId)) {
+          updatesByReport.set(row.reportId, new Map());
+        }
+        updatesByReport.get(row.reportId).set(row.bookingIndex, row.attended);
+      });
+
+      updatesByReport.forEach((bookingMap, reportId) => {
+        const report = allReports.find(r => r.id === reportId);
+        if (!report || !Array.isArray(report.bookings)) return;
+
+        const newBookings = report.bookings.map((b, idx) => {
+          if (bookingMap.has(idx)) {
+            return {
+              ...b,
+              attended: bookingMap.get(idx)
+            };
+          }
+          return b;
+        });
+
+        const docRef = doc(db, "reports", reportId);
+        batch.update(docRef, { bookings: newBookings });
+      });
+
+      await batch.commit();
+      alert("Attended statuses saved successfully.");
+
+      // نعمل reload للبيانات عشان تتحدث
+      await loadReports();
+    } catch (err) {
+      console.error(err);
+      alert("Error while saving attended statuses. Please try again.");
+    }
   }
 
   async function loadReports() {
@@ -1648,30 +1724,23 @@
     });
 
     downloadPerformanceBtn.addEventListener("click", downloadPerformancePDF);
+    bookingDataBtn.addEventListener("click", openBookingsOverlay);
 
-    // زرار Booking data يفتح الـ overlay
-    downloadBookingsBtn.addEventListener("click", openBookingsOverlay);
-    downloadExcelFromOverlayBtn.addEventListener("click", downloadBookingsExcel);
     closeBookingsOverlayBtn.addEventListener("click", closeBookingsOverlay);
-
-    // زرار Save يحفظ الـ attended (هو أصلاً بيتحفظ مع كل change، بس ده تأكيد للمستخدم)
-    saveAttendanceBtn.addEventListener("click", () => {
-      saveAttendedToStorage();
-      alert("Attendance saved.");
-    });
-
-    // لو المستخدم ضغط برا البانيل يقفل
     bookingsOverlay.addEventListener("click", (e) => {
       if (e.target === bookingsOverlay) {
         closeBookingsOverlay();
       }
     });
 
+    saveBookingsBtn.addEventListener("click", saveBookingsAttended);
+    downloadBookingsExcelBtn.addEventListener("click", downloadBookingsExcel);
+
     loadReports();
   }
 
-  // Login handler (بدون DOMContentLoaded عشان نتأكد إنه شغال)
-  loginForm.addEventListener("submit", (e) => {
+  // Login handler (بدون DOMContentLoaded عشان يشتغل أكيد)
+  function handleLoginSubmit(e) {
     e.preventDefault();
     const usernameInput = (loginUsername.value || "").trim();
     const username = usernameInput.toLowerCase();
@@ -1687,7 +1756,11 @@
     } else {
       loginError.style.display = "block";
     }
-  });
+  }
+
+  if (loginForm) {
+    loginForm.addEventListener("submit", handleLoginSubmit);
+  }
 </script>
 </body>
 </html>
