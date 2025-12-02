@@ -83,7 +83,7 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 18px;
+      margin-bottom: 12px;
       gap: 12px;
     }
 
@@ -140,6 +140,49 @@
       color: var(--text-main);
     }
 
+    /* Tabs */
+    .tabs {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+      padding-bottom: 4px;
+    }
+
+    .tab-btn {
+      border: 1px solid transparent;
+      border-radius: 999px;
+      padding: 5px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, transform 0.05s ease;
+    }
+
+    .tab-btn span {
+      font-size: 13px;
+    }
+
+    .tab-btn.active {
+      background: rgba(15, 23, 42, 0.95);
+      border-color: rgba(55, 65, 81, 0.9);
+      color: var(--text-main);
+      transform: translateY(-1px);
+    }
+
+    .tab-content {
+      display: none;
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
     .filters {
       margin-bottom: 14px;
       border-radius: 16px;
@@ -151,7 +194,6 @@
 
     .filters-grid {
       display: grid;
-      /* مقاسات متناسقة – التواريخ قد بعض */
       grid-template-columns: 1.2fr 1fr 1.1fr 1.1fr 1.1fr;
       gap: 10px;
       align-items: end;
@@ -504,144 +546,6 @@
       opacity: 0.85;
     }
 
-    /* Overlay Panel for Booking data preview */
-    .overlay-backdrop {
-      position: fixed;
-      inset: 0;
-      background: rgba(15, 23, 42, 0.85);
-      backdrop-filter: blur(6px);
-      display: none;
-      align-items: center;
-      justify-content: center;
-      z-index: 999;
-    }
-
-    .overlay-backdrop.active {
-      display: flex;
-    }
-
-    .overlay-panel {
-      width: min(1000px, 96vw);
-      max-height: 82vh;
-      border-radius: 22px;
-      background: radial-gradient(circle at top, rgba(15,23,42,0.97), #020617 80%);
-      border: 1px solid rgba(55,65,81,0.95);
-      box-shadow: 0 22px 60px rgba(0,0,0,0.75);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .overlay-header {
-      padding: 14px 16px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      border-bottom: 1px solid rgba(31,41,55,0.9);
-    }
-
-    .overlay-header-title {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-    }
-
-    .overlay-header-title h3 {
-      margin: 0;
-      font-size: 15px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .overlay-header-title p {
-      margin: 0;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .overlay-close-btn {
-      border-radius: 999px;
-      width: 28px;
-      height: 28px;
-      border: 1px solid rgba(55,65,81,0.9);
-      background: rgba(15,23,42,0.95);
-      color: var(--text-muted);
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 16px;
-      transition: background 0.15s ease, transform 0.05s ease;
-    }
-
-    .overlay-close-btn:hover {
-      background: rgba(31,41,55,1);
-      color: var(--text-main);
-      transform: translateY(-1px);
-    }
-
-    .overlay-body {
-      padding: 10px 14px 8px;
-      flex: 1;
-      overflow: auto;
-    }
-
-    .overlay-table-wrapper {
-      border-radius: 14px;
-      border: 1px solid rgba(55,65,81,0.9);
-      overflow: auto;
-      background: rgba(15,23,42,0.98);
-    }
-
-    .overlay-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 11px;
-      min-width: 900px;
-    }
-
-    .overlay-table thead {
-      background: linear-gradient(90deg, rgba(15,23,42,1), rgba(15,23,42,0.98));
-    }
-
-    .overlay-table th {
-      padding: 8px 8px;
-      font-weight: 500;
-      color: var(--text-muted);
-      text-align: left;
-      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
-      white-space: nowrap;
-    }
-
-    .overlay-table td {
-      padding: 7px 8px;
-      border-bottom: 1px solid rgba(31,41,55,0.85);
-      white-space: nowrap;
-    }
-
-    .overlay-footer {
-      padding: 10px 14px 12px;
-      border-top: 1px solid rgba(31,41,55,0.9);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-
-    .overlay-footer-left {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 11px;
-      color: var(--text-muted);
-    }
-
-    .overlay-footer-left strong {
-      color: var(--text-main);
-    }
-
     @media (max-width: 900px) {
       body {
         align-items: stretch;
@@ -699,15 +603,6 @@
       .table-footer {
         flex-direction: column;
         align-items: flex-start;
-      }
-
-      .overlay-panel {
-        width: 96vw;
-        max-height: 88vh;
-      }
-
-      .overlay-table {
-        min-width: 700px;
       }
     }
 
@@ -784,151 +679,192 @@
           </div>
         </div>
 
-        <!-- Filters -->
-        <div class="filters">
-          <div class="filters-grid">
-            <div class="filter-group">
-              <label for="filterModerator">Moderator</label>
-              <select id="filterModerator">
-                <option value="All">All</option>
-              </select>
-            </div>
+        <!-- Tabs -->
+        <div class="tabs">
+          <button type="button" class="tab-btn active" data-tab="performance">
+            <span>📈</span> Performance
+          </button>
+          <button type="button" class="tab-btn" data-tab="bookings">
+            <span>📅</span> Bookings
+          </button>
+        </div>
 
-            <div class="filter-group">
-              <label for="filterNew">New client?</label>
-              <select id="filterNew">
-                <option value="All">All</option>
-                <option value="New">New only</option>
-                <option value="NotNew">Not New</option>
-              </select>
-            </div>
+        <!-- PERFORMANCE TAB -->
+        <div id="performanceTab" class="tab-content active">
+          <!-- Filters -->
+          <div class="filters">
+            <div class="filters-grid">
+              <div class="filter-group">
+                <label for="filterModerator">Moderator</label>
+                <select id="filterModerator">
+                  <option value="All">All</option>
+                </select>
+              </div>
 
-            <div class="filter-group">
-              <label for="dateFilterMode">Filter by</label>
-              <select id="dateFilterMode">
-                <option value="report">Report date</option>
-                <option value="session">Session date</option>
-              </select>
-            </div>
+              <div class="filter-group">
+                <label for="filterNew">New client?</label>
+                <select id="filterNew">
+                  <option value="All">All</option>
+                  <option value="New">New only</option>
+                  <option value="NotNew">Not New</option>
+                </select>
+              </div>
 
-            <div class="filter-group">
-              <label for="fromDate">From date</label>
-              <input type="date" id="fromDate" />
-            </div>
+              <!-- (Filter by) removed كما طلبت -->
 
-            <div class="filter-group">
-              <label for="toDate">To date</label>
-              <div class="filters-actions">
-                <input type="date" id="toDate" style="flex:1; min-width:0;" />
-                <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small" style="margin-left:4px;">
-                  Reset
-                </button>
-                <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small">
-                  Apply
-                </button>
+              <div class="filter-group">
+                <label for="fromDate">From report date</label>
+                <input type="date" id="fromDate" />
+              </div>
+
+              <div class="filter-group">
+                <label for="toDate">To report date</label>
+                <div class="filters-actions">
+                  <input type="date" id="toDate" style="flex:1; min-width:0;" />
+                  <button type="button" id="resetFiltersBtn" class="btn btn-secondary btn-small" style="margin-left:4px;">
+                    Reset
+                  </button>
+                  <button type="button" id="applyFiltersBtn" class="btn btn-primary btn-small">
+                    Apply
+                  </button>
+                </div>
+              </div>
+
+              <!-- خانة فاضية بس علشان الجريد يفضل متناسق -->
+              <div class="filter-group"></div>
+            </div>
+          </div>
+
+          <div style="margin-top:4px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:8px;">
+            <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
+              📥 Download performance PDF (current filter)
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="table-wrapper">
+            <table>
+              <thead>
+              <tr>
+                <th>Date</th>
+                <th>Moderator</th>
+                <th>Shift</th>
+                <th>Total clients</th>
+                <th>Total new</th>
+                <th>Scar</th>
+                <th>You</th>
+                <th>Created</th>
+                <th>Actions</th>
+              </tr>
+              </thead>
+              <tbody id="reportsBody">
+              </tbody>
+            </table>
+          </div>
+
+          <div class="table-footer">
+            <div class="badge">
+              <span class="badge-dot blue"></span>
+              Reports loaded: <strong id="reportsCount">0</strong>
+            </div>
+            <div class="badge">
+              <span class="badge-dot green"></span>
+              Total clients in filter: <strong id="totalClientsFiltered">0</strong>
+            </div>
+          </div>
+
+          <div id="errorBox" class="error-box">
+            <strong>Connection error:</strong> Unable to load reports at the moment. Please refresh the page or check your connection.
+          </div>
+        </div>
+
+        <!-- BOOKINGS TAB -->
+        <div id="bookingsTab" class="tab-content">
+          <!-- Filters for bookings -->
+          <div class="filters">
+            <div class="filters-grid">
+              <div class="filter-group">
+                <label for="bookingsModeratorFilter">Moderator</label>
+                <select id="bookingsModeratorFilter">
+                  <option value="All">All</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="bookingsHandledFilter">Handled by</label>
+                <select id="bookingsHandledFilter">
+                  <option value="All">All</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="bookingsNewFilter">New client?</label>
+                <select id="bookingsNewFilter">
+                  <option value="All">All</option>
+                  <option value="New">New only</option>
+                  <option value="NotNew">Not New</option>
+                </select>
+              </div>
+
+              <div class="filter-group">
+                <label for="bookingsFromDate">From session date</label>
+                <input type="date" id="bookingsFromDate" />
+              </div>
+
+              <div class="filter-group">
+                <label for="bookingsToDate">To session date</label>
+                <div class="filters-actions">
+                  <input type="date" id="bookingsToDate" style="flex:1; min-width:0;" />
+                  <button type="button" id="bookingsResetFiltersBtn" class="btn btn-secondary btn-small" style="margin-left:4px;">
+                    Reset
+                  </button>
+                  <button type="button" id="bookingsApplyFiltersBtn" class="btn btn-primary btn-small">
+                    Apply
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div style="margin-top:4px; margin-bottom:8px; display:flex; flex-wrap:wrap; gap:8px;">
-          <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
-            📥 Download performance PDF (current filter)
-          </button>
-          <button type="button" id="bookingDataBtn" class="btn btn-secondary btn-block-mobile">
-            📊 Booking data
-          </button>
-        </div>
-
-        <!-- Table -->
-        <div class="table-wrapper">
-          <table>
-            <thead>
-            <tr>
-              <th>Date</th>
-              <th>Moderator</th>
-              <th>Shift</th>
-              <th>Total clients</th>
-              <th>Total new</th>
-              <th>Scar</th>
-              <th>You</th>
-              <th>Created</th>
-              <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody id="reportsBody">
-            </tbody>
-          </table>
-        </div>
-
-        <div class="table-footer">
-          <div class="badge">
-            <span class="badge-dot blue"></span>
-            Reports loaded: <strong id="reportsCount">0</strong>
+          <!-- Bookings table (نفس بيانات زرار booking data القديم + Handled by) -->
+          <div class="table-wrapper">
+            <table>
+              <thead>
+              <tr>
+                <th>Report Date</th>
+                <th>Moderator</th>
+                <th>Client Name</th>
+                <th>Phone</th>
+                <th>Session No.</th>
+                <th>Session Date</th>
+                <th>Service</th>
+                <th>Branch</th>
+                <th>Handled by</th>
+                <th>Attended</th>
+                <th>New?</th>
+              </tr>
+              </thead>
+              <tbody id="bookingsTableBody">
+              </tbody>
+            </table>
           </div>
-          <div class="badge">
-            <span class="badge-dot green"></span>
-            Total clients in filter: <strong id="totalClientsFiltered">0</strong>
+
+          <div class="table-footer">
+            <div class="badge">
+              <span class="badge-dot purple"></span>
+              Rows: <strong id="bookingsRowsCount">0</strong>
+            </div>
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button type="button" id="saveBookingsBtn" class="btn btn-primary">
+                💾 Save attended
+              </button>
+              <button type="button" id="downloadBookingsExcelBtn" class="btn btn-secondary">
+                📥 Download Excel sheet
+              </button>
+            </div>
           </div>
         </div>
 
-        <div id="errorBox" class="error-box">
-          <strong>Connection error:</strong> Unable to load reports at the moment. Please refresh the page or check your connection.
-        </div>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- Booking Data Overlay -->
-  <div id="bookingsOverlay" class="overlay-backdrop">
-    <div class="overlay-panel">
-      <div class="overlay-header">
-        <div class="overlay-header-title">
-          <h3>📊 Booking data (current filter)</h3>
-          <p>Review and mark attended status before exporting to Excel.</p>
-        </div>
-        <button type="button" id="closeBookingsOverlayBtn" class="overlay-close-btn" aria-label="Close">
-          ✕
-        </button>
-      </div>
-      <div class="overlay-body">
-        <div class="overlay-table-wrapper">
-          <table class="overlay-table">
-            <thead>
-            <tr>
-              <th>Report Date</th>
-              <th>Moderator</th>
-              <th>Client Name</th>
-              <th>Phone</th>
-              <th>Session No.</th>
-              <th>Session Date</th>
-              <th>Service</th>
-              <th>Branch</th>
-              <th>Attended</th>
-              <th>New?</th>
-            </tr>
-            </thead>
-            <tbody id="bookingsTableBody">
-            </tbody>
-          </table>
-        </div>
-      </div>
-      <div class="overlay-footer">
-        <div class="overlay-footer-left">
-          <span class="badge">
-            <span class="badge-dot purple"></span>
-            Rows: <strong id="bookingsRowsCount">0</strong>
-          </span>
-        </div>
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
-          <button type="button" id="saveBookingsBtn" class="btn btn-primary">
-            💾 Save attended
-          </button>
-          <button type="button" id="downloadBookingsExcelBtn" class="btn btn-secondary">
-            📥 Download Excel sheet
-          </button>
-        </div>
       </div>
     </div>
   </div>
@@ -964,39 +900,54 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
+  const MODERATORS_LIST = ["Shahd", "Manar", "Treeza", "Engy", "Monica", "Zeinab", "Samah"];
+
   const connectionStatus = document.getElementById("connectionStatus");
   const connectionText = document.getElementById("connectionText");
   const statusPill = document.getElementById("statusPill");
 
+  // Tabs
+  const performanceTab = document.getElementById("performanceTab");
+  const bookingsTab = document.getElementById("bookingsTab");
+  const tabButtons = document.querySelectorAll(".tab-btn");
+
+  // Performance filters
   const filterModerator = document.getElementById("filterModerator");
   const filterNew = document.getElementById("filterNew");
-  const dateFilterMode = document.getElementById("dateFilterMode");
   const fromDateInput = document.getElementById("fromDate");
   const toDateInput = document.getElementById("toDate");
   const resetFiltersBtn = document.getElementById("resetFiltersBtn");
   const applyFiltersBtn = document.getElementById("applyFiltersBtn");
   const downloadPerformanceBtn = document.getElementById("downloadPerformanceBtn");
-  const bookingDataBtn = document.getElementById("bookingDataBtn");
 
+  // Performance table
   const reportsBody = document.getElementById("reportsBody");
   const reportsCountSpan = document.getElementById("reportsCount");
   const totalClientsFilteredSpan = document.getElementById("totalClientsFiltered");
   const errorBox = document.getElementById("errorBox");
 
+  // Bookings filters
+  const bookingsModeratorFilter = document.getElementById("bookingsModeratorFilter");
+  const bookingsHandledFilter = document.getElementById("bookingsHandledFilter");
+  const bookingsNewFilter = document.getElementById("bookingsNewFilter");
+  const bookingsFromDateInput = document.getElementById("bookingsFromDate");
+  const bookingsToDateInput = document.getElementById("bookingsToDate");
+  const bookingsApplyFiltersBtn = document.getElementById("bookingsApplyFiltersBtn");
+  const bookingsResetFiltersBtn = document.getElementById("bookingsResetFiltersBtn");
+
+  // Bookings table
+  const bookingsTableBody = document.getElementById("bookingsTableBody");
+  const bookingsRowsCount = document.getElementById("bookingsRowsCount");
+  const saveBookingsBtn = document.getElementById("saveBookingsBtn");
+  const downloadBookingsExcelBtn = document.getElementById("downloadBookingsExcelBtn");
+
+  // Login
   const loginShell = document.getElementById("loginShell");
   const dashboardShell = document.getElementById("dashboardShell");
   const loginForm = document.getElementById("loginForm");
   const loginUsername = document.getElementById("loginUsername");
   const loginPassword = document.getElementById("loginPassword");
   const loginError = document.getElementById("loginError");
-
-  // Overlay elements
-  const bookingsOverlay = document.getElementById("bookingsOverlay");
-  const closeBookingsOverlayBtn = document.getElementById("closeBookingsOverlayBtn");
-  const bookingsTableBody = document.getElementById("bookingsTableBody");
-  const bookingsRowsCount = document.getElementById("bookingsRowsCount");
-  const saveBookingsBtn = document.getElementById("saveBookingsBtn");
-  const downloadBookingsExcelBtn = document.getElementById("downloadBookingsExcelBtn");
 
   // ثابت لليوزرنيم والباسوردات
   const VALID_USERS = {
@@ -1010,10 +961,8 @@
 
   let allReports = [];
   let filteredReports = [];
+  let currentBookingsRows = [];
   let isDashboardInitialized = false;
-
-  // صفوف الـ preview مع الميتا الخاصة بكل حجز
-  let currentBookingPreviewRows = [];
 
   const FOOTER_TEXT = "© Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan";
 
@@ -1067,6 +1016,24 @@
     return false;
   }
 
+  function populateModeratorDropdown(selectEl, includeAll = true) {
+    if (!selectEl) return;
+    selectEl.innerHTML = "";
+    if (includeAll) {
+      const optAll = document.createElement("option");
+      optAll.value = "All";
+      optAll.textContent = "All";
+      selectEl.appendChild(optAll);
+    }
+    MODERATORS_LIST.forEach((name) => {
+      const opt = document.createElement("option");
+      opt.value = name;
+      opt.textContent = name;
+      selectEl.appendChild(opt);
+    });
+  }
+
+  // PERFORMANCE FILTERS
   function applyFilters() {
     errorBox.style.display = "none";
 
@@ -1074,63 +1041,47 @@
     const newFilter = filterNew.value;
     const from = fromDateInput.value;
     const to = toDateInput.value;
-    const dateMode = dateFilterMode.value || "report";
 
     const newFilteredReports = [];
 
     allReports.forEach((r) => {
       // Filter by moderator
-      if (mod !== "All" && r.moderator !== mod) return;
+      if (mod !== "All") {
+        const rMod = (r.moderator || "").toLowerCase();
+        if (rMod !== mod.toLowerCase()) return;
+      }
 
       const bookingsArray = Array.isArray(r.bookings) ? r.bookings : [];
 
-      // Date filter when mode = report
-      let passesReportDate = true;
-      if (dateMode === "report") {
-        if (from && r.date && r.date < from) passesReportDate = false;
-        if (to && r.date && r.date > to) passesReportDate = false;
-      }
-
-      if (dateMode === "report" && !passesReportDate) {
-        return;
-      }
-
-      // فلترة الـ bookings بناءً على New + Session date عند الحاجة
-      const filteredBookings = bookingsArray.filter((b) => {
+      // Filter bookings by new
+      const filteredBookingsByNew = bookingsArray.filter((b) => {
         const isNew = bookingIsNew(b);
-
         if (newFilter === "New" && !isNew) return false;
         if (newFilter === "NotNew" && isNew) return false;
-
-        if (dateMode === "session") {
-          const dateStr = b.sessionDate || "";
-          if (from && dateStr && dateStr < from) return false;
-          if (to && dateStr && dateStr > to) return false;
-        }
-
         return true;
       });
 
-      // نقرر نعرض الريبورت ولا لأ
-      let includeReport = true;
-      if (dateMode === "session") {
-        includeReport = filteredBookings.length > 0;
-      } else {
-        if (newFilter === "New" || newFilter === "NotNew") {
-          includeReport = filteredBookings.length > 0;
-        }
-      }
+      // Date filter by report date
+      let passesReportDate = true;
+      if (from && r.date && r.date < from) passesReportDate = false;
+      if (to && r.date && r.date > to) passesReportDate = false;
+      if (!passesReportDate) return;
 
+      // include report only if عندنا حجوزات matching لو بنفلتر بالـ New
+      let includeReport = true;
+      if (newFilter === "New" || newFilter === "NotNew") {
+        includeReport = filteredBookingsByNew.length > 0;
+      }
       if (!includeReport) return;
 
-      // حساب التوتال بناء على الـ filteredBookings لو موجودة
+      // totals
+      const baseBookingsForTotals =
+        (newFilter !== "All" && filteredBookingsByNew.length)
+          ? filteredBookingsByNew
+          : bookingsArray;
+
       let visibleTotals;
       let visibleTotalNew;
-
-      const baseBookingsForTotals =
-        (dateMode === "session" || newFilter !== "All") && filteredBookings.length
-          ? filteredBookings
-          : bookingsArray;
 
       if (baseBookingsForTotals.length) {
         let total = 0, scar = 0, you = 0, totalNew = 0;
@@ -1148,8 +1099,8 @@
         visibleTotalNew = r.totalNew ?? 0;
       }
 
-      const visibleBookings = (dateMode === "session" || newFilter !== "All")
-        ? filteredBookings
+      const visibleBookings = (newFilter !== "All")
+        ? filteredBookingsByNew
         : bookingsArray;
 
       newFilteredReports.push({
@@ -1313,13 +1264,14 @@
       b.service || "",
       b.platform || "",
       b.branch || "",
+      b.handledBy || "",
       b.marked || "",
       bookingIsNew(b) ? "New" : ""
     ]);
 
     doc.autoTable({
       startY: y,
-      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Marked", "New?"]],
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Handled by", "Marked", "New?"]],
       body: tableBody,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [56, 189, 248] }
@@ -1351,9 +1303,8 @@
     const from = fromDateInput.value || "Any";
     const to = toDateInput.value || "Any";
     const newFilter = filterNew.value || "All";
-    const dateModeLabel = dateFilterMode.value === "session" ? "Session Date" : "Report Date";
     doc.text(
-      `Filter – Moderator: ${mod}, New: ${newFilter}, Date mode: ${dateModeLabel}, From: ${from}, To: ${to}`,
+      `Filter – Moderator: ${mod}, New: ${newFilter}, Date mode: Report Date, From: ${from}, To: ${to}`,
       14,
       y
     );
@@ -1409,56 +1360,130 @@
     doc.save(fileName);
   }
 
-  // بناء بيانات bookings للإكسيل أو الـ overlay
-  function buildBookingsRowsFromFilteredReports() {
-    const scarRows = [];
-    const youRows = [];
+  // BOOKINGS TAB – build rows from allReports مع الفلاتر الجديدة
+  function rebuildBookingsRows() {
+    bookingsTableBody.innerHTML = "";
+    currentBookingsRows = [];
 
-    filteredReports.forEach((report) => {
-      const reportDate = report.date || "";
-      const bookings = Array.isArray(report.visibleBookings || report.bookings)
-        ? (report.visibleBookings || report.bookings)
-        : [];
+    const modVal = bookingsModeratorFilter.value;
+    const handledVal = bookingsHandledFilter.value;
+    const newVal = bookingsNewFilter.value;
+    const from = bookingsFromDateInput.value;
+    const to = bookingsToDateInput.value;
 
-      bookings.forEach((b) => {
+    allReports.forEach((report) => {
+      const bookings = Array.isArray(report.bookings) ? report.bookings : [];
+      bookings.forEach((b, idx) => {
+        const sessionDate = b.sessionDate || "";
+
+        if (from && (!sessionDate || sessionDate < from)) return;
+        if (to && (!sessionDate || sessionDate > to)) return;
+
+        const isNew = bookingIsNew(b);
+        if (newVal === "New" && !isNew) return;
+        if (newVal === "NotNew" && isNew) return;
+
+        if (modVal !== "All") {
+          const reportMod = (report.moderator || "").toLowerCase();
+          if (reportMod !== modVal.toLowerCase()) return;
+        }
+
+        if (handledVal !== "All") {
+          const handled = (b.handledBy || "").toLowerCase();
+          if (handled !== handledVal.toLowerCase()) return;
+        }
+
         const branchFallback = b.branch || report.branch || report.clinic || "";
-        const branchNameLower = (branchFallback || "").toLowerCase();
+        const branchNameLower = branchFallback.toLowerCase();
         const attended = bookingIsAttended(b);
+        const handledBy = b.handledBy || "";
 
-        const baseRow = {
-          "Report Date": reportDate,
+        const rowData = {
+          "Report Date": report.date || "",
           "Moderator": report.moderator || "",
           "Client Name": b.name || "",
           "Phone": b.phone || "",
           "Session No.": b.sessionNumber || "",
-          "Session Date": b.sessionDate || "",
+          "Session Date": sessionDate,
           "Service": b.service || "",
-          "Branch": branchFallback || "",
+          "Branch": branchFallback,
+          "Handled by": handledBy,
           "Attended": attended ? "Yes" : "",
-          "New?": bookingIsNew(b) ? "New" : ""
+          "New?": isNew ? "New" : ""
         };
 
-        const meta = {
+        currentBookingsRows.push({
           reportId: report.id,
+          bookingIndex: idx,
           bookingRef: b,
-          row: baseRow,
-          isYou: branchNameLower.includes("you")
-        };
-
-        if (meta.isYou) {
-          youRows.push(meta);
-        } else {
-          scarRows.push(meta);
-        }
+          isYou: branchNameLower.includes("you"),
+          attended,
+          data: rowData
+        });
       });
     });
 
-    return { scarRows, youRows };
+    // sort ascending by Session Date
+    currentBookingsRows.sort((a, b) => {
+      const da = a.data["Session Date"] || "";
+      const db = b.data["Session Date"] || "";
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da.localeCompare(db);
+    });
+
+    currentBookingsRows.forEach((row, index) => {
+      const tr = document.createElement("tr");
+      tr.dataset.index = String(index);
+
+      function addCell(text) {
+        const td = document.createElement("td");
+        td.textContent = text;
+        tr.appendChild(td);
+      }
+
+      addCell(row.data["Report Date"]);
+      addCell(row.data["Moderator"]);
+      addCell(row.data["Client Name"]);
+      addCell(row.data["Phone"]);
+      addCell(row.data["Session No."]);
+      addCell(row.data["Session Date"]);
+      addCell(row.data["Service"]);
+      addCell(row.data["Branch"]);
+
+      const handledTd = document.createElement("td");
+      handledTd.textContent = row.data["Handled by"];
+      tr.appendChild(handledTd);
+
+      const attendedTd = document.createElement("td");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = row.attended;
+      cb.dataset.index = String(index);
+      cb.addEventListener("change", (e) => {
+        const idx = parseInt(e.target.dataset.index, 10);
+        if (!Number.isNaN(idx) && currentBookingsRows[idx]) {
+          currentBookingsRows[idx].attended = e.target.checked;
+          currentBookingsRows[idx].data["Attended"] = e.target.checked ? "Yes" : "";
+        }
+      });
+      attendedTd.appendChild(cb);
+      tr.appendChild(attendedTd);
+
+      const newTd = document.createElement("td");
+      newTd.textContent = row.data["New?"];
+      tr.appendChild(newTd);
+
+      bookingsTableBody.appendChild(tr);
+    });
+
+    bookingsRowsCount.textContent = String(currentBookingsRows.length);
   }
 
   function downloadBookingsExcel() {
-    if (!filteredReports.length) {
-      alert("No reports in current filter.");
+    if (!currentBookingsRows.length) {
+      alert("No bookings in current filter.");
       return;
     }
 
@@ -1467,11 +1492,8 @@
       return;
     }
 
-    const { scarRows, youRows } = buildBookingsRowsFromFilteredReports();
-
-    // نحول من meta لـ rows بس
-    const scarRowsPlain = scarRows.map(m => m.row);
-    const youRowsPlain = youRows.map(m => m.row);
+    const scarRowsPlain = currentBookingsRows.filter(r => !r.isYou).map(r => r.data);
+    const youRowsPlain = currentBookingsRows.filter(r => r.isYou).map(r => r.data);
 
     function sortBySessionDate(rows) {
       rows.sort((a, b) => {
@@ -1496,6 +1518,7 @@
       "Session Date",
       "Service",
       "Branch",
+      "Handled by",
       "Attended",
       "New?"
     ];
@@ -1523,105 +1546,24 @@
     XLSX.utils.book_append_sheet(wb, scarSheet, "Scar");
     XLSX.utils.book_append_sheet(wb, youSheet, "You");
 
-    const mod = filterModerator.value || "All";
-    const from = fromDateInput.value || "Any";
-    const to = toDateInput.value || "Any";
-    const mode = dateFilterMode.value === "session" ? "Session" : "Report";
-    const fileName = `Bookings-${mod}-${from}-${to}-${mode}.xlsx`;
+    const mod = bookingsModeratorFilter.value || "All";
+    const from = bookingsFromDateInput.value || "Any";
+    const to = bookingsToDateInput.value || "Any";
+    const fileName = `Bookings-${mod}-${from}-${to}-Session.xlsx`;
     XLSX.writeFile(wb, fileName);
   }
 
-  // Overlay – فتح وبناء الجدول
-  function openBookingsOverlay() {
-    if (!filteredReports.length) {
-      alert("No reports in current filter.");
-      return;
-    }
-
-    bookingsTableBody.innerHTML = "";
-    currentBookingPreviewRows = [];
-
-    const { scarRows, youRows } = buildBookingsRowsFromFilteredReports();
-    const allMetaRows = [...scarRows, ...youRows];
-
-    allMetaRows.forEach((meta, index) => {
-      const { reportId, bookingRef, row, isYou } = meta;
-      const originalReport = allReports.find(r => r.id === reportId) || {};
-      const originalBookings = Array.isArray(originalReport.bookings) ? originalReport.bookings : [];
-      const bookingIndex = originalBookings.indexOf(bookingRef); // نفس الريفرنس
-
-      const attended = bookingIsAttended(bookingRef);
-
-      currentBookingPreviewRows.push({
-        reportId,
-        bookingIndex,
-        bookingRef,
-        isYou,
-        data: row,
-        attended
-      });
-
-      const tr = document.createElement("tr");
-      tr.dataset.index = String(index);
-
-      function addCell(text) {
-        const td = document.createElement("td");
-        td.textContent = text;
-        tr.appendChild(td);
-      }
-
-      addCell(row["Report Date"]);
-      addCell(row["Moderator"]);
-      addCell(row["Client Name"]);
-      addCell(row["Phone"]);
-      addCell(row["Session No."]);
-      addCell(row["Session Date"]);
-      addCell(row["Service"]);
-      addCell(row["Branch"]);
-
-      // Attended checkbox
-      const attendedTd = document.createElement("td");
-      const cb = document.createElement("input");
-      cb.type = "checkbox";
-      cb.checked = attended;
-      cb.dataset.index = String(index);
-      cb.addEventListener("change", (e) => {
-        const idx = parseInt(e.target.dataset.index, 10);
-        if (!Number.isNaN(idx) && currentBookingPreviewRows[idx]) {
-          currentBookingPreviewRows[idx].attended = e.target.checked;
-        }
-      });
-      attendedTd.appendChild(cb);
-      tr.appendChild(attendedTd);
-
-      const newTd = document.createElement("td");
-      newTd.textContent = bookingIsNew(bookingRef) ? "New" : "";
-      tr.appendChild(newTd);
-
-      bookingsTableBody.appendChild(tr);
-    });
-
-    bookingsRowsCount.textContent = String(currentBookingPreviewRows.length);
-    bookingsOverlay.classList.add("active");
-  }
-
-  function closeBookingsOverlay() {
-    bookingsOverlay.classList.remove("active");
-  }
-
   async function saveBookingsAttended() {
-    if (!currentBookingPreviewRows.length) {
+    if (!currentBookingsRows.length) {
       alert("No booking rows to save.");
       return;
     }
 
     try {
       const batch = writeBatch(db);
-
-      // نجمع التغييرات لكل report
       const updatesByReport = new Map();
 
-      currentBookingPreviewRows.forEach((row) => {
+      currentBookingsRows.forEach((row) => {
         if (row.bookingIndex < 0) return;
         if (!updatesByReport.has(row.reportId)) {
           updatesByReport.set(row.reportId, new Map());
@@ -1650,7 +1592,7 @@
       await batch.commit();
       alert("Attended statuses saved successfully.");
 
-      // نعمل reload للبيانات عشان تتحدث
+      // reload data
       await loadReports();
     } catch (err) {
       console.error(err);
@@ -1682,24 +1624,8 @@
 
       filteredReports = allReports.slice();
 
-      const moderatorsSet = new Set(["All"]);
-      allReports.forEach((r) => {
-        if (r.moderator) moderatorsSet.add(r.moderator);
-      });
-
-      const currentValue = filterModerator.value || "All";
-      filterModerator.innerHTML = "";
-      moderatorsSet.forEach((name) => {
-        const opt = document.createElement("option");
-        opt.value = name;
-        opt.textContent = name;
-        filterModerator.appendChild(opt);
-      });
-      if (moderatorsSet.has(currentValue)) {
-        filterModerator.value = currentValue;
-      }
-
       applyFilters();
+      rebuildBookingsRows();
 
       setConnectionStatus(true, "Connected");
     } catch (e) {
@@ -1709,28 +1635,57 @@
     }
   }
 
+  function initTabs() {
+    tabButtons.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const tab = btn.dataset.tab;
+
+        tabButtons.forEach((b) => b.classList.remove("active"));
+        btn.classList.add("active");
+
+        if (tab === "performance") {
+          performanceTab.classList.add("active");
+          bookingsTab.classList.remove("active");
+        } else {
+          bookingsTab.classList.add("active");
+          performanceTab.classList.remove("active");
+          // لما يدخل التب نضمن إن البيانات محدثة
+          rebuildBookingsRows();
+        }
+      });
+    });
+  }
+
   function initDashboardOnce() {
     if (isDashboardInitialized) return;
     isDashboardInitialized = true;
+
+    initTabs();
+
+    // Populate moderator dropdowns ثابتة بالأسماء اللي قولتلي عليها
+    populateModeratorDropdown(filterModerator, true);
+    populateModeratorDropdown(bookingsModeratorFilter, true);
+    populateModeratorDropdown(bookingsHandledFilter, true);
 
     applyFiltersBtn.addEventListener("click", applyFilters);
     resetFiltersBtn.addEventListener("click", () => {
       filterModerator.value = "All";
       filterNew.value = "All";
-      dateFilterMode.value = "report";
       fromDateInput.value = "";
       toDateInput.value = "";
       applyFilters();
     });
 
     downloadPerformanceBtn.addEventListener("click", downloadPerformancePDF);
-    bookingDataBtn.addEventListener("click", openBookingsOverlay);
 
-    closeBookingsOverlayBtn.addEventListener("click", closeBookingsOverlay);
-    bookingsOverlay.addEventListener("click", (e) => {
-      if (e.target === bookingsOverlay) {
-        closeBookingsOverlay();
-      }
+    bookingsApplyFiltersBtn.addEventListener("click", rebuildBookingsRows);
+    bookingsResetFiltersBtn.addEventListener("click", () => {
+      bookingsModeratorFilter.value = "All";
+      bookingsHandledFilter.value = "All";
+      bookingsNewFilter.value = "All";
+      bookingsFromDateInput.value = "";
+      bookingsToDateInput.value = "";
+      rebuildBookingsRows();
     });
 
     saveBookingsBtn.addEventListener("click", saveBookingsAttended);
@@ -1739,7 +1694,7 @@
     loadReports();
   }
 
-  // Login handler (بدون DOMContentLoaded عشان يشتغل أكيد)
+  // Login handler
   function handleLoginSubmit(e) {
     e.preventDefault();
     const usernameInput = (loginUsername.value || "").trim();
