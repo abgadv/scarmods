@@ -149,9 +149,10 @@
       box-shadow: var(--shadow-sm);
     }
 
+    /* === تعديل مقاس الأعمدة بتاعة الفلاتر === */
     .filters-grid {
       display: grid;
-      grid-template-columns: repeat(5, minmax(0, 1fr));
+      grid-template-columns: 1.1fr 1.1fr 1.2fr 0.9fr 0.9fr; /* التواريخ قد بعض والباقي أقصر شوية */
       gap: 10px;
       align-items: end;
     }
@@ -503,6 +504,83 @@
       opacity: 0.85;
     }
 
+    /* === Overlay panel لعرض الـ Booking data === */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.88);
+      backdrop-filter: blur(6px);
+      z-index: 999;
+    }
+
+    .overlay-panel {
+      background: radial-gradient(circle at top, rgba(15,23,42,0.95), rgba(15,23,42,0.99) 40%, #020617 100%);
+      border-radius: 20px;
+      border: 1px solid rgba(55, 65, 81, 0.9);
+      box-shadow: var(--shadow-soft);
+      width: 100%;
+      max-width: 1000px;
+      max-height: calc(100vh - 80px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .overlay-header {
+      padding: 14px 16px 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid rgba(31, 41, 55, 0.9);
+    }
+
+    .overlay-header h2 {
+      margin: 0;
+      font-size: 16px;
+    }
+
+    .overlay-header p {
+      margin: 2px 0 0;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .overlay-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .overlay-body {
+      padding: 10px 14px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      height: 100%;
+    }
+
+    .overlay-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .overlay-table-wrapper {
+      flex: 1;
+      min-height: 0;
+      border-radius: 14px;
+      overflow: auto;
+    }
+
+    .overlay table {
+      font-size: 11px;
+      min-width: 750px;
+    }
+
     @media (max-width: 900px) {
       body {
         align-items: stretch;
@@ -536,6 +614,10 @@
       .btn-block-mobile {
         width: 100%;
         justify-content: center;
+      }
+
+      .overlay-panel {
+        max-width: calc(100% - 20px);
       }
     }
 
@@ -687,8 +769,9 @@
           <button type="button" id="downloadPerformanceBtn" class="btn btn-secondary btn-block-mobile">
             📥 Download performance PDF (current filter)
           </button>
+          <!-- تغيير النص لـ Booking data -->
           <button type="button" id="downloadBookingsBtn" class="btn btn-secondary btn-block-mobile">
-            📊 Download bookings data
+            📊 Booking data
           </button>
         </div>
 
@@ -728,6 +811,52 @@
           <strong>Connection error:</strong> Unable to load reports at the moment. Please refresh the page or check your connection.
         </div>
 
+      </div>
+    </div>
+  </div>
+
+  <!-- Overlay Panel لعرض الـ Booking data -->
+  <div id="bookingsOverlay" class="overlay">
+    <div class="overlay-panel">
+      <div class="overlay-header">
+        <div class="overlay-header-left">
+          <h2>Booking data</h2>
+          <p>Preview, mark attendance, and export Excel for the current filter.</p>
+        </div>
+        <button type="button" id="closeBookingsOverlay" class="btn-icon" title="Close">
+          ✕
+        </button>
+      </div>
+      <div class="overlay-body">
+        <div class="overlay-actions">
+          <button type="button" id="saveAttendanceBtn" class="btn btn-primary btn-small">
+            💾 Save
+          </button>
+          <button type="button" id="downloadExcelFromOverlayBtn" class="btn btn-secondary btn-small">
+            📊 Download Excel sheet
+          </button>
+        </div>
+
+        <div class="table-wrapper overlay-table-wrapper">
+          <table>
+            <thead>
+            <tr>
+              <th>Report Date</th>
+              <th>Moderator</th>
+              <th>Client Name</th>
+              <th>Phone</th>
+              <th>Session No.</th>
+              <th>Session Date</th>
+              <th>Service</th>
+              <th>Branch</th>
+              <th>Attended</th>
+              <th>New?</th>
+            </tr>
+            </thead>
+            <tbody id="bookingsPreviewBody">
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   </div>
@@ -787,6 +916,13 @@
   const loginPassword = document.getElementById("loginPassword");
   const loginError = document.getElementById("loginError");
 
+  // عناصر الـ overlay
+  const bookingsOverlay = document.getElementById("bookingsOverlay");
+  const bookingsPreviewBody = document.getElementById("bookingsPreviewBody");
+  const closeBookingsOverlayBtn = document.getElementById("closeBookingsOverlay");
+  const saveAttendanceBtn = document.getElementById("saveAttendanceBtn");
+  const downloadExcelFromOverlayBtn = document.getElementById("downloadExcelFromOverlayBtn");
+
   // ثابت لليوزرنيم والباسوردات
   const VALID_USERS = {
     "islam": "gasd53ds4fs5dg34",
@@ -802,6 +938,53 @@
   let isDashboardInitialized = false;
 
   const FOOTER_TEXT = "© Mods Online Web App - Developed By AB Graphics and More - By Mohamed Hakim - Baraa Atef - Zaki Radwan";
+
+  /* ====== تخزين الـ Attended في localStorage ====== */
+  const ATTENDED_STORAGE_KEY = "mods_attended_v1";
+  let attendedMap = {};
+
+  function loadAttendedFromStorage() {
+    try {
+      const raw = localStorage.getItem(ATTENDED_STORAGE_KEY);
+      attendedMap = raw ? JSON.parse(raw) : {};
+    } catch {
+      attendedMap = {};
+    }
+  }
+
+  function saveAttendedToStorage() {
+    try {
+      localStorage.setItem(ATTENDED_STORAGE_KEY, JSON.stringify(attendedMap));
+    } catch {
+      // ignore
+    }
+  }
+
+  function getBookingKey(report, booking) {
+    return [
+      report.id || "",
+      booking.sessionNumber || "",
+      booking.phone || "",
+      booking.sessionDate || "",
+      booking.name || ""
+    ].join("|");
+  }
+
+  function isBookingAttended(report, booking) {
+    const key = getBookingKey(report, booking);
+    return !!attendedMap[key];
+  }
+
+  function setBookingAttended(report, booking, value) {
+    const key = getBookingKey(report, booking);
+    if (value) {
+      attendedMap[key] = true;
+    } else {
+      delete attendedMap[key];
+    }
+  }
+
+  loadAttendedFromStorage();
 
   function setConnectionStatus(ok, msg) {
     connectionStatus.classList.toggle("error", !ok);
@@ -827,7 +1010,7 @@
     }
   }
 
-  // New client flag: يعتمد بس على القيم new / yes من الداتا بيز (مع شوية تسامح لو Boolean / رقم)
+  // New client flag
   function bookingIsNew(b) {
     if (!b) return false;
     const raw = b.isNew ?? b.new ?? b.isNewClient ?? "";
@@ -852,12 +1035,10 @@
     const newFilteredReports = [];
 
     allReports.forEach((r) => {
-      // Filter by moderator
       if (mod !== "All" && r.moderator !== mod) return;
 
       const bookingsArray = Array.isArray(r.bookings) ? r.bookings : [];
 
-      // Date filter when mode = report (على مستوى الريبورت)
       let passesReportDate = true;
       if (dateMode === "report") {
         if (from && r.date && r.date < from) passesReportDate = false;
@@ -868,7 +1049,6 @@
         return;
       }
 
-      // فلترة الـ bookings بناءً على New + Session date عند الحاجة
       const filteredBookings = bookingsArray.filter((b) => {
         const isNew = bookingIsNew(b);
 
@@ -884,22 +1064,17 @@
         return true;
       });
 
-      // نقرر نعرض الريبورت ولا لأ
       let includeReport = true;
       if (dateMode === "session") {
-        // لو مفيش ولا booking بعد فلترة الـ session date يبقى الريبورت مش داخل الفلتر
         includeReport = filteredBookings.length > 0;
       } else {
-        // report date mode
         if (newFilter === "New" || newFilter === "NotNew") {
-          // لازم يبقى في bookings مطابقة للـ new filter
           includeReport = filteredBookings.length > 0;
         }
       }
 
       if (!includeReport) return;
 
-      // حساب التوتال بناء على الـ filteredBookings لو موجودة
       let visibleTotals;
       let visibleTotalNew;
 
@@ -1185,6 +1360,103 @@
     doc.save(fileName);
   }
 
+  /* ====== بناء جدول الـ overlay من نفس الداتا بتاعة Excel ====== */
+  function buildBookingsPreviewTable() {
+    bookingsPreviewBody.innerHTML = "";
+
+    const rows = [];
+
+    filteredReports.forEach((report) => {
+      const reportDate = report.date || "";
+      const bookings = Array.isArray(report.visibleBookings || report.bookings)
+        ? (report.visibleBookings || report.bookings)
+        : [];
+
+      bookings.forEach((b) => {
+        rows.push({
+          report,
+          booking: b,
+          data: {
+            "Report Date": reportDate,
+            "Moderator": report.moderator || "",
+            "Client Name": b.name || "",
+            "Phone": b.phone || "",
+            "Session No.": b.sessionNumber || "",
+            "Session Date": b.sessionDate || "",
+            "Service": b.service || "",
+            "Branch": b.branch || report.branch || report.clinic || "",
+            "New?": bookingIsNew(b) ? "New" : ""
+          }
+        });
+      });
+    });
+
+    // نفس ترتيب الـ Excel: حسب Session Date
+    rows.sort((a, b) => {
+      const da = a.data["Session Date"] || "";
+      const db = b.data["Session Date"] || "";
+      if (!da && !db) return 0;
+      if (!da) return 1;
+      if (!db) return -1;
+      return da.localeCompare(db);
+    });
+
+    rows.forEach(({ report, booking, data }) => {
+      const tr = document.createElement("tr");
+
+      const headerOrder = [
+        "Report Date",
+        "Moderator",
+        "Client Name",
+        "Phone",
+        "Session No.",
+        "Session Date",
+        "Service",
+        "Branch"
+      ];
+
+      headerOrder.forEach((h) => {
+        const td = document.createElement("td");
+        td.textContent = data[h] || "";
+        tr.appendChild(td);
+      });
+
+      // Attended checkbox
+      const attendedTd = document.createElement("td");
+      const cb = document.createElement("input");
+      cb.type = "checkbox";
+      cb.checked = isBookingAttended(report, booking);
+      cb.addEventListener("change", () => {
+        setBookingAttended(report, booking, cb.checked);
+        saveAttendedToStorage(); // نحفظ مباشرة عشان لما يرجع يلاقيها زي ما هي
+      });
+      attendedTd.appendChild(cb);
+      tr.appendChild(attendedTd);
+
+      // New?
+      const newTd = document.createElement("td");
+      newTd.textContent = data["New?"] || "";
+      tr.appendChild(newTd);
+
+      bookingsPreviewBody.appendChild(tr);
+    });
+  }
+
+  function openBookingsOverlay() {
+    if (!filteredReports.length) {
+      alert("No reports in current filter.");
+      return;
+    }
+    buildBookingsPreviewTable();
+    bookingsOverlay.style.display = "flex";
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeBookingsOverlay() {
+    bookingsOverlay.style.display = "none";
+    document.body.style.overflow = "";
+  }
+
   function downloadBookingsExcel() {
     if (!filteredReports.length) {
       alert("No reports in current filter.");
@@ -1209,6 +1481,8 @@
         const branch = b.branch || report.branch || report.clinic || "";
         const branchName = (branch || "").toLowerCase();
 
+        const attended = isBookingAttended(report, b) ? "Yes" : "";
+
         const row = {
           "Report Date": reportDate,
           "Moderator": report.moderator || "",
@@ -1218,7 +1492,7 @@
           "Session Date": b.sessionDate || "",
           "Service": b.service || "",
           "Branch": branch || "",
-          "Attended": "",
+          "Attended": attended,
           "New?": bookingIsNew(b) ? "New" : ""
         };
 
@@ -1261,7 +1535,6 @@
     const scarSheet = XLSX.utils.json_to_sheet(scarRows, { header });
     const youSheet = XLSX.utils.json_to_sheet(youRows, { header });
 
-    // Auto-fit columns based on max text length
     function autoFitColumns(ws, rows) {
       const colWidths = header.map(h => h.length);
       rows.forEach(row => {
@@ -1375,30 +1648,45 @@
     });
 
     downloadPerformanceBtn.addEventListener("click", downloadPerformancePDF);
-    downloadBookingsBtn.addEventListener("click", downloadBookingsExcel);
+
+    // زرار Booking data يفتح الـ overlay
+    downloadBookingsBtn.addEventListener("click", openBookingsOverlay);
+    downloadExcelFromOverlayBtn.addEventListener("click", downloadBookingsExcel);
+    closeBookingsOverlayBtn.addEventListener("click", closeBookingsOverlay);
+
+    // زرار Save يحفظ الـ attended (هو أصلاً بيتحفظ مع كل change، بس ده تأكيد للمستخدم)
+    saveAttendanceBtn.addEventListener("click", () => {
+      saveAttendedToStorage();
+      alert("Attendance saved.");
+    });
+
+    // لو المستخدم ضغط برا البانيل يقفل
+    bookingsOverlay.addEventListener("click", (e) => {
+      if (e.target === bookingsOverlay) {
+        closeBookingsOverlay();
+      }
+    });
 
     loadReports();
   }
 
-  // Login handler (مع معالجة الـ lowercase والـ spaces)
-  document.addEventListener("DOMContentLoaded", () => {
-    loginForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const usernameInput = (loginUsername.value || "").trim();
-      const username = usernameInput.toLowerCase(); // يخليها lowercase عشان مفيش مشكلة حروف كابيتال
-      const password = (loginPassword.value || "").trim();
+  // Login handler (بدون DOMContentLoaded عشان نتأكد إنه شغال)
+  loginForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const usernameInput = (loginUsername.value || "").trim();
+    const username = usernameInput.toLowerCase();
+    const password = (loginPassword.value || "").trim();
 
-      const expectedPassword = VALID_USERS[username];
+    const expectedPassword = VALID_USERS[username];
 
-      if (expectedPassword && expectedPassword === password) {
-        loginError.style.display = "none";
-        loginShell.style.display = "none";
-        dashboardShell.style.display = "block";
-        initDashboardOnce();
-      } else {
-        loginError.style.display = "block";
-      }
-    });
+    if (expectedPassword && expectedPassword === password) {
+      loginError.style.display = "none";
+      loginShell.style.display = "none";
+      dashboardShell.style.display = "block";
+      initDashboardOnce();
+    } else {
+      loginError.style.display = "block";
+    }
   });
 </script>
 </body>
