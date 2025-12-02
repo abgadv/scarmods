@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -237,6 +238,12 @@
       justify-content: center;
     }
 
+    .btn-table {
+      padding: 5px 10px;
+      font-size: 0.75rem;
+      border-radius: 12px;
+    }
+
     .footer-actions {
       display: flex;
       justify-content: flex-end;
@@ -325,7 +332,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.8rem;
-      min-width: 820px;
+      min-width: 880px;
       color: var(--text-main);
     }
 
@@ -334,6 +341,7 @@
       padding: 6px 8px;
       text-align: left;
       border-bottom: 1px solid #111827;
+      vertical-align: middle;
     }
 
     thead {
@@ -344,21 +352,32 @@
       font-weight: 600;
       font-size: 0.78rem;
       color: var(--text-muted);
+      white-space: nowrap;
     }
 
-    td input,
-    td select {
-      font-size: 0.78rem;
-      padding: 4px 6px;
-      border-radius: 8px;
-      background: #020617;
-      border-color: #111827;
-      color: var(--text-main);
+    .badge-yes,
+    .badge-no {
+      display: inline-flex;
+      padding: 2px 6px;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      border: 1px solid rgba(148, 163, 184, 0.5);
     }
 
-    td input[type="checkbox"] {
-      width: auto;
-      transform: scale(1.1);
+    .badge-yes {
+      color: var(--success-strong);
+      border-color: rgba(34, 197, 94, 0.7);
+    }
+
+    .badge-no {
+      color: var(--text-muted);
+    }
+
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: nowrap; /* مهم عشان في الموبايل مايبقوش فوق بعض */
     }
 
     .table-footer {
@@ -425,7 +444,7 @@
       }
 
       table {
-        min-width: 680px;
+        min-width: 760px;
       }
 
       .footer-actions {
@@ -449,6 +468,78 @@
       font-size: 0.75rem;
       color: var(--text-muted);
       text-align: center;
+    }
+
+    /* ===== POPUP / MODAL STYLES ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.85);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 12px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-card {
+      background: radial-gradient(circle at top left, #020617, #020617 60%);
+      border-radius: 20px;
+      border: 1px solid rgba(148, 163, 184, 0.3);
+      box-shadow: var(--shadow-soft);
+      padding: 16px 14px 18px;
+      width: 100%;
+      max-width: 620px;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 10px;
+      gap: 8px;
+    }
+
+    .modal-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+    }
+
+    .modal-close {
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+    }
+
+    .modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px 14px;
+      margin-top: 6px;
+    }
+
+    @media (max-width: 600px) {
+      .modal-grid {
+        grid-template-columns: minmax(0, 1fr); /* صفوف كاملة في الموبايل */
+      }
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      margin-top: 14px;
+      flex-wrap: wrap;
+    }
+
+    .modal-actions .btn {
+      min-width: 90px;
     }
   </style>
 </head>
@@ -583,6 +674,7 @@
             <th>Service</th>
             <th>Platform</th>
             <th>Branch</th>
+            <th>Handled by</th>
             <th>New?</th>
             <th>Marked</th>
             <th>Actions</th>
@@ -664,6 +756,94 @@
   </div>
 </div>
 
+<!-- CLIENT POPUP MODAL -->
+<div id="clientModal" class="modal-overlay">
+  <div class="modal-card">
+    <div class="modal-header">
+      <h3 id="clientModalTitle">Add client</h3>
+      <button type="button" id="clientModalClose" class="modal-close">✕</button>
+    </div>
+    <form id="clientForm">
+      <div class="modal-grid">
+        <div class="field">
+          <label for="clientName">Name</label>
+          <input type="text" id="clientName" placeholder="Client name" />
+        </div>
+        <div class="field">
+          <label for="clientPhone">Phone</label>
+          <input type="tel" id="clientPhone" placeholder="Phone" />
+        </div>
+        <div class="field">
+          <label for="clientSessionNo">Session No.</label>
+          <input type="number" min="1" id="clientSessionNo" placeholder="No." />
+        </div>
+        <div class="field">
+          <label for="clientSessionDate">Session Date</label>
+          <input type="date" id="clientSessionDate" />
+        </div>
+        <div class="field">
+          <label for="clientService">Service</label>
+          <input type="text" id="clientService" placeholder="Service" />
+        </div>
+        <div class="field">
+          <label for="clientPlatform">Platform</label>
+          <select id="clientPlatform">
+            <option value="">Select</option>
+            <option value="facebook">facebook</option>
+            <option value="Instagram">Instagram</option>
+            <option value="whatsapp">whatsapp</option>
+            <option value="phone call">phone call</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="clientBranch">Branch</label>
+          <select id="clientBranch">
+            <option value="">Select</option>
+            <option value="You Clinic">You Clinic</option>
+            <option value="Scar Clinic">Scar Clinic</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="clientHandledBy">Handled by</label>
+          <select id="clientHandledBy">
+            <option value="">Select</option>
+            <option>Shahd</option>
+            <option>Manar</option>
+            <option>Treeza</option>
+            <option>Engy</option>
+            <option>Monica</option>
+            <option>Zeinab</option>
+            <option>Samah</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="clientNew">New?</label>
+          <div>
+            <input type="checkbox" id="clientNew" />
+            <span class="small-hint">Mark as new client</span>
+          </div>
+        </div>
+        <div class="field">
+          <label for="clientMarked">Marked</label>
+          <div>
+            <input type="checkbox" id="clientMarked" />
+            <span class="small-hint">Marked / attended</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" id="clientCancelBtn" class="btn btn-secondary">
+          Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          Save
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
 <!-- FIREBASE + LOGIC -->
 <script type="module">
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
@@ -691,6 +871,7 @@
   let checkInTime = null;
   let checkOutTime = null;
   let activeStep = 1;
+  let bookingsState = []; // كل العملاء هنا
 
   // DOM shortcuts
   const section1 = document.getElementById("section-1");
@@ -726,6 +907,26 @@
 
   const syncStatusText = document.getElementById("syncStatusText");
 
+  // Modal elements
+  const clientModal = document.getElementById("clientModal");
+  const clientModalTitle = document.getElementById("clientModalTitle");
+  const clientModalClose = document.getElementById("clientModalClose");
+  const clientCancelBtn = document.getElementById("clientCancelBtn");
+  const clientForm = document.getElementById("clientForm");
+
+  const clientNameInput = document.getElementById("clientName");
+  const clientPhoneInput = document.getElementById("clientPhone");
+  const clientSessionNoInput = document.getElementById("clientSessionNo");
+  const clientSessionDateInput = document.getElementById("clientSessionDate");
+  const clientServiceInput = document.getElementById("clientService");
+  const clientPlatformSelect = document.getElementById("clientPlatform");
+  const clientBranchSelect = document.getElementById("clientBranch");
+  const clientHandledBySelect = document.getElementById("clientHandledBy");
+  const clientNewCheckbox = document.getElementById("clientNew");
+  const clientMarkedCheckbox = document.getElementById("clientMarked");
+
+  let editingIndex = null; // null = add, otherwise edit index
+
   // -------- Local Storage --------
   const STORAGE_KEY = "scarGroupModeratorsSessionV1";
 
@@ -743,7 +944,7 @@
         coverShift: coverShiftInput.value || "",
         checkInTime: checkInTime ? checkInTime.toISOString() : null,
         checkOutTime: checkOutTime ? checkOutTime.toISOString() : null,
-        bookings: collectBookingsData(),
+        bookings: bookingsState,
         activeStep
       };
       localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
@@ -784,33 +985,8 @@
       }
 
       if (Array.isArray(saved.bookings) && saved.bookings.length) {
-        bookingsBody.innerHTML = "";
-        saved.bookings.forEach((b) => {
-          createBookingRow();
-          const row = bookingsBody.lastElementChild;
-          const tds = row.querySelectorAll("td");
-
-          tds[1].querySelector("input").value = b.name || "";
-          tds[2].querySelector("input").value = b.phone || "";
-          tds[3].querySelector("input").value = b.sessionNumber || "";
-          tds[4].querySelector("input").value = b.sessionDate || "";
-          tds[5].querySelector("input").value = b.service || "";
-          tds[6].querySelector("select").value = b.platform || "";
-          tds[7].querySelector("select").value = b.branch || "";
-
-          // New?
-          const newCheckbox = tds[8].querySelector("input[type='checkbox']");
-          if (newCheckbox) {
-            newCheckbox.checked = b.isNew === "Yes";
-          }
-
-          // Marked
-          const markedCheckbox = tds[9].querySelector("input[type='checkbox']");
-          if (markedCheckbox) {
-            markedCheckbox.checked = b.marked === "Yes";
-          }
-        });
-        updateTotalClients();
+        bookingsState = saved.bookings;
+        renderBookingsTable();
       }
 
       const dateStr = reportDateInput.value;
@@ -928,141 +1104,114 @@
   }
 
   function updateTotalClients() {
-    const rows = bookingsBody.querySelectorAll("tr");
-    totalClientsSpan.textContent = rows.length.toString();
+    totalClientsSpan.textContent = bookingsState.length.toString();
   }
 
-  function createBookingRow() {
-    const row = document.createElement("tr");
+  // ===== TABLE RENDERING (عرض فقط) =====
+  function renderBookingsTable() {
+    bookingsBody.innerHTML = "";
+    bookingsState.forEach((b, idx) => {
+      const row = document.createElement("tr");
 
-    // 0 - index
-    const indexCell = document.createElement("td");
-    indexCell.textContent = (bookingsBody.children.length + 1).toString();
-    row.appendChild(indexCell);
+      const indexCell = document.createElement("td");
+      indexCell.textContent = (idx + 1).toString();
+      row.appendChild(indexCell);
 
-    // 1 - name
-    const nameCell = document.createElement("td");
-    const nameInput = document.createElement("input");
-    nameInput.type = "text";
-    nameInput.placeholder = "Client name";
-    nameCell.appendChild(nameInput);
-    row.appendChild(nameCell);
+      const nameCell = document.createElement("td");
+      nameCell.textContent = b.name || "";
+      row.appendChild(nameCell);
 
-    // 2 - phone
-    const phoneCell = document.createElement("td");
-    const phoneInput = document.createElement("input");
-    phoneInput.type = "tel";
-    phoneInput.placeholder = "Phone";
-    phoneCell.appendChild(phoneInput);
-    row.appendChild(phoneCell);
+      const phoneCell = document.createElement("td");
+      phoneCell.textContent = b.phone || "";
+      row.appendChild(phoneCell);
 
-    // 3 - session no
-    const sessionNoCell = document.createElement("td");
-    const sessionNoInput = document.createElement("input");
-    sessionNoInput.type = "number";
-    sessionNoInput.min = "1";
-    sessionNoInput.placeholder = "No.";
-    sessionNoCell.appendChild(sessionNoInput);
-    row.appendChild(sessionNoCell);
+      const sessionNoCell = document.createElement("td");
+      sessionNoCell.textContent = b.sessionNumber || "";
+      row.appendChild(sessionNoCell);
 
-    // 4 - session date
-    const sessionDateCell = document.createElement("td");
-    const sessionDateInput = document.createElement("input");
-    sessionDateInput.type = "date";
-    sessionDateCell.appendChild(sessionDateInput);
-    row.appendChild(sessionDateCell);
+      const sessionDateCell = document.createElement("td");
+      sessionDateCell.textContent = b.sessionDate || "";
+      row.appendChild(sessionDateCell);
 
-    // 5 - service
-    const serviceCell = document.createElement("td");
-    const serviceInput = document.createElement("input");
-    serviceInput.type = "text";
-    serviceInput.placeholder = "Service";
-    serviceCell.appendChild(serviceInput);
-    row.appendChild(serviceCell);
+      const serviceCell = document.createElement("td");
+      serviceCell.textContent = b.service || "";
+      row.appendChild(serviceCell);
 
-    // 6 - platform
-    const platformCell = document.createElement("td");
-    const platformSelect = document.createElement("select");
-    ["", "facebook", "Instagram", "whatsapp", "phone call"].forEach((val) => {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.textContent = val === "" ? "Select" : val;
-      platformSelect.appendChild(opt);
-    });
-    platformCell.appendChild(platformSelect);
-    row.appendChild(platformCell);
+      const platformCell = document.createElement("td");
+      platformCell.textContent = b.platform || "";
+      row.appendChild(platformCell);
 
-    // 7 - branch
-    const branchCell = document.createElement("td");
-    const branchSelect = document.createElement("select");
-    ["", "You Clinic", "Scar Clinic"].forEach((val) => {
-      const opt = document.createElement("option");
-      opt.value = val;
-      opt.textContent = val === "" ? "Select" : val;
-      branchSelect.appendChild(opt);
-    });
-    branchCell.appendChild(branchSelect);
-    row.appendChild(branchCell);
+      const branchCell = document.createElement("td");
+      branchCell.textContent = b.branch || "";
+      row.appendChild(branchCell);
 
-    // 8 - New?
-    const newCell = document.createElement("td");
-    const newCheckbox = document.createElement("input");
-    newCheckbox.type = "checkbox";
-    newCell.appendChild(newCheckbox);
-    row.appendChild(newCell);
+      const handledByCell = document.createElement("td");
+      handledByCell.textContent = b.handledBy || "";
+      row.appendChild(handledByCell);
 
-    // 9 - Marked
-    const markedCell = document.createElement("td");
-    const markedCheckbox = document.createElement("input");
-    markedCheckbox.type = "checkbox";
-    markedCell.appendChild(markedCheckbox);
-    row.appendChild(markedCell);
+      const newCell = document.createElement("td");
+      const newBadge = document.createElement("span");
+      newBadge.className = b.isNew === "Yes" ? "badge-yes" : "badge-no";
+      newBadge.textContent = b.isNew === "Yes" ? "Yes" : "No";
+      newCell.appendChild(newBadge);
+      row.appendChild(newCell);
 
-    // 10 - actions
-    const actionsCell = document.createElement("td");
-    const deleteBtn = document.createElement("button");
-    deleteBtn.type = "button";
-    deleteBtn.className = "btn btn-ghost";
-    deleteBtn.textContent = "Delete";
-    deleteBtn.addEventListener("click", () => {
-      row.remove();
-      Array.from(bookingsBody.children).forEach((tr, idx) => {
-        tr.firstChild.textContent = (idx + 1).toString();
+      const markedCell = document.createElement("td");
+      const markedBadge = document.createElement("span");
+      markedBadge.className = b.marked === "Yes" ? "badge-yes" : "badge-no";
+      markedBadge.textContent = b.marked === "Yes" ? "Yes" : "No";
+      markedCell.appendChild(markedBadge);
+      row.appendChild(markedCell);
+
+      const actionsCell = document.createElement("td");
+      const actionsGroup = document.createElement("div");
+      actionsGroup.className = "actions-group";
+
+      const editBtn = document.createElement("button");
+      editBtn.type = "button";
+      editBtn.className = "btn btn-secondary btn-table";
+      editBtn.textContent = "Edit";
+      editBtn.addEventListener("click", () => {
+        openClientModal("edit", idx);
       });
-      updateTotalClients();
-      saveSessionToLocalStorage();
-    });
-    actionsCell.appendChild(deleteBtn);
-    row.appendChild(actionsCell);
 
-    bookingsBody.appendChild(row);
+      const deleteBtn = document.createElement("button");
+      deleteBtn.type = "button";
+      deleteBtn.className = "btn btn-ghost btn-table";
+      deleteBtn.textContent = "Delete";
+      deleteBtn.addEventListener("click", () => {
+        if (confirm("Delete this client?")) {
+          bookingsState.splice(idx, 1);
+          renderBookingsTable();
+          saveSessionToLocalStorage();
+        }
+      });
+
+      actionsGroup.appendChild(editBtn);
+      actionsGroup.appendChild(deleteBtn);
+      actionsCell.appendChild(actionsGroup);
+      row.appendChild(actionsCell);
+
+      bookingsBody.appendChild(row);
+    });
     updateTotalClients();
   }
 
   function collectBookingsData() {
-    const rows = bookingsBody.querySelectorAll("tr");
-    const data = [];
-    rows.forEach((tr, idx) => {
-      const tds = tr.querySelectorAll("td");
-      const getInput = (cellIdx) => tds[cellIdx].querySelector("input, select");
-
-      const newCheckbox = tds[8].querySelector("input[type='checkbox']");
-      const markedCheckbox = tds[9].querySelector("input[type='checkbox']");
-
-      data.push({
-        index: idx + 1,
-        name: getInput(1)?.value.trim() || "",
-        phone: getInput(2)?.value.trim() || "",
-        sessionNumber: getInput(3)?.value.trim() || "",
-        sessionDate: getInput(4)?.value || "",
-        service: getInput(5)?.value.trim() || "",
-        platform: getInput(6)?.value || "",
-        branch: getInput(7)?.value || "",
-        isNew: newCheckbox && newCheckbox.checked ? "Yes" : "No",
-        marked: markedCheckbox && markedCheckbox.checked ? "Yes" : "No",
-      });
-    });
-    return data;
+    // دلوقتي هنرجّع البيانات من ال state مش من الـ DOM
+    return bookingsState.map((b, idx) => ({
+      index: idx + 1,
+      name: b.name || "",
+      phone: b.phone || "",
+      sessionNumber: b.sessionNumber || "",
+      sessionDate: b.sessionDate || "",
+      service: b.service || "",
+      platform: b.platform || "",
+      branch: b.branch || "",
+      handledBy: b.handledBy || "",
+      isNew: b.isNew === "Yes" ? "Yes" : "No",
+      marked: b.marked === "Yes" ? "Yes" : "No"
+    }));
   }
 
   function computeBranchTotals(bookings) {
@@ -1175,13 +1324,14 @@
       b.service,
       b.platform,
       b.branch,
+      b.handledBy,
       b.isNew,
       b.marked,
     ]);
 
     doc.autoTable({
       startY: y,
-      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "New?", "Marked"]],
+      head: [["#", "Name", "Phone", "Session No.", "Session Date", "Service", "Platform", "Branch", "Handled by", "New?", "Marked"]],
       body: tableBody,
       styles: { fontSize: 8 },
       headStyles: { fillColor: [56, 189, 248] },
@@ -1203,8 +1353,8 @@
     coverForInput.value = "";
     coverShiftInput.value = "";
     coverDetails.style.display = "none";
-    bookingsBody.innerHTML = "";
-    updateTotalClients();
+    bookingsState = [];
+    renderBookingsTable();
     checkInTime = null;
     checkOutTime = null;
     checkInDisplay.textContent = "Not checked in yet.";
@@ -1220,6 +1370,47 @@
     reportDateInput.value = `${yyyy}-${mm}-${dd}`;
 
     setActiveSection(1);
+  }
+
+  // ===== MODAL HELPERS =====
+  function resetClientForm() {
+    clientNameInput.value = "";
+    clientPhoneInput.value = "";
+    clientSessionNoInput.value = "";
+    clientSessionDateInput.value = "";
+    clientServiceInput.value = "";
+    clientPlatformSelect.value = "";
+    clientBranchSelect.value = "";
+    clientHandledBySelect.value = "";
+    clientNewCheckbox.checked = false;
+    clientMarkedCheckbox.checked = false;
+  }
+
+  function openClientModal(mode = "add", index = null) {
+    editingIndex = index;
+    if (mode === "edit" && index != null && bookingsState[index]) {
+      const b = bookingsState[index];
+      clientModalTitle.textContent = "Edit client";
+      clientNameInput.value = b.name || "";
+      clientPhoneInput.value = b.phone || "";
+      clientSessionNoInput.value = b.sessionNumber || "";
+      clientSessionDateInput.value = b.sessionDate || "";
+      clientServiceInput.value = b.service || "";
+      clientPlatformSelect.value = b.platform || "";
+      clientBranchSelect.value = b.branch || "";
+      clientHandledBySelect.value = b.handledBy || "";
+      clientNewCheckbox.checked = b.isNew === "Yes";
+      clientMarkedCheckbox.checked = b.marked === "Yes";
+    } else {
+      clientModalTitle.textContent = "Add client";
+      resetClientForm();
+    }
+
+    clientModal.classList.add("active");
+  }
+
+  function closeClientModal() {
+    clientModal.classList.remove("active");
   }
 
   document.addEventListener("DOMContentLoaded", () => {
@@ -1246,9 +1437,6 @@
     moderatorSelect.addEventListener("change", saveSessionToLocalStorage);
     coverForInput.addEventListener("change", saveSessionToLocalStorage);
     coverShiftInput.addEventListener("change", saveSessionToLocalStorage);
-
-    bookingsBody.addEventListener("input", saveSessionToLocalStorage);
-    bookingsBody.addEventListener("change", saveSessionToLocalStorage);
 
     checkInBtn.addEventListener("click", () => {
       const dateStr = reportDateInput.value;
@@ -1327,8 +1515,53 @@
     backTo2Btn.addEventListener("click", () => setActiveSection(2));
 
     addClientBtn.addEventListener("click", () => {
-      createBookingRow();
+      openClientModal("add");
+    });
+
+    // Modal events
+    clientModalClose.addEventListener("click", closeClientModal);
+    clientCancelBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      closeClientModal();
+    });
+
+    clientModal.addEventListener("click", (e) => {
+      if (e.target === clientModal) {
+        closeClientModal();
+      }
+    });
+
+    clientForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      const booking = {
+        name: clientNameInput.value.trim(),
+        phone: clientPhoneInput.value.trim(),
+        sessionNumber: clientSessionNoInput.value ? clientSessionNoInput.value.toString() : "",
+        sessionDate: clientSessionDateInput.value || "",
+        service: clientServiceInput.value.trim(),
+        platform: clientPlatformSelect.value || "",
+        branch: clientBranchSelect.value || "",
+        handledBy: clientHandledBySelect.value || "",
+        isNew: clientNewCheckbox.checked ? "Yes" : "No",
+        marked: clientMarkedCheckbox.checked ? "Yes" : "No",
+      };
+
+      // ممكن تضيف هنا validation لو حابب (مثلاً لازم الاسم و التليفون)
+      if (!booking.name) {
+        alert("Please enter client name.");
+        return;
+      }
+
+      if (editingIndex != null) {
+        bookingsState[editingIndex] = booking;
+      } else {
+        bookingsState.push(booking);
+      }
+
+      renderBookingsTable();
       saveSessionToLocalStorage();
+      closeClientModal();
     });
 
     newSessionBtn.addEventListener("click", () => {
